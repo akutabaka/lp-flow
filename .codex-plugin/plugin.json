@@ -1,0 +1,50 @@
+{
+  "name": "lp-flow",
+  "version": "0.1.0-rc.2",
+  "description": "LP-Flow docking and molecular dynamics workflows with GNINA/SMINA, Boltz, Matcha, GROMACS, configured compute runtimes, and Burrete handoff.",
+  "author": {
+    "name": "akutabaka",
+    "url": "https://github.com/akutabaka"
+  },
+  "homepage": "https://github.com/akutabaka/lp-flow",
+  "repository": "https://github.com/akutabaka/lp-flow",
+  "license": "CC-BY-NC-4.0",
+  "keywords": [
+    "docking",
+    "lp-flow",
+    "compute-runtime",
+    "gnina",
+    "smina",
+    "boltz",
+    "matcha",
+    "molecular-dynamics",
+    "gromacs",
+    "trajectory-analysis",
+    "redocking",
+    "visualization"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "LP-Flow",
+    "shortDescription": "Run docking/MD and hand off molecular results to Burrete.",
+    "longDescription": "Dock, score, and prepare molecular dynamics tasks with configured compute runtimes when heavy compute is needed, GNINA/SMINA/Boltz/optional Matcha/GROMACS workflows, wide CSV summaries, packaging, and Burrete handoff for ordinary molecular viewing and trajectory review.",
+    "developerName": "LP-Flow",
+    "websiteURL": "https://github.com/akutabaka/lp-flow",
+    "category": "Research",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Run GNINA/SMINA docking for this folder",
+      "Score this complex with Boltz",
+      "Prepare a GROMACS MD workflow"
+    ],
+    "brandColor": "#0F766E",
+    "composerIcon": "./assets/composer-icon.png",
+    "logo": "./assets/logo.png",
+    "screenshots": []
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "GROMACS MD"
+  short_description: "Prepare, run, clean, analyze, and hand off GROMACS MD."
+  default_prompt: "Use $gromacs-md to prepare a documented GROMACS workflow, run stages, analyze metrics, and package a multi-frame bounded no-water PDB plus compact preview topology/metadata for Burrete display, with single .gro snapshots and native topology/trajectory kept for interpretation."

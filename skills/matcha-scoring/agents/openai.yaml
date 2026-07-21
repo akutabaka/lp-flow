@@ -1,0 +1,4 @@
+interface:
+  display_name: "Matcha Scoring"
+  short_description: "Optional Matcha pose scoring."
+  default_prompt: "Use $matcha-scoring when the active profile provides Matcha checkout/checkpoints; parse supported outputs or mark Matcha unavailable with logs."

@@ -1,0 +1,20 @@
+{
+  "name": "lp-flow-local",
+  "interface": {
+    "displayName": "LP-Flow Local"
+  },
+  "plugins": [
+    {
+      "name": "lp-flow",
+      "source": {
+        "source": "local",
+        "path": "./plugins/lp-flow"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Research"
+    }
+  ]
+}

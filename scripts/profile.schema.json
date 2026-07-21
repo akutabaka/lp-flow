@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lp-flow.local/schemas/lp-flow-profile.schema.json",
+  "title": "LP-Flow Local Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["profile_name", "username", "remote_work_root"],
+  "anyOf": [
+    { "required": ["ssh_alias"] },
+    { "required": ["host"] },
+    { "required": ["ssh_command"] }
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "profile_name": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+$"
+    },
+    "profile_ref": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+$"
+    },
+    "ssh_alias": {
+      "type": "string",
+      "pattern": "^(?!-)[A-Za-z0-9_.-]+$",
+      "description": "Optional user-provided SSH config alias. The plugin never stores private keys."
+    },
+    "ssh_command": {
+      "type": "string",
+      "description": "Optional explicit local command. Runtime allows only simple ssh/ssh.exe forms without ProxyCommand or arbitrary options."
+    },
+    "ssh_batch_mode": {
+      "type": ["boolean", "string"],
+      "description": "Optional SSH BatchMode toggle. Defaults to true so agent tools never wait for interactive password prompts."
+    },
+    "ssh_connect_timeout": {
+      "type": "string",
+      "pattern": "^[0-9]{1,4}$",
+      "description": "Optional SSH ConnectTimeout in seconds. Defaults to 15 for agent-safe failure instead of hanging."
+    },
+    "host": {
+      "type": "string",
+      "pattern": "^(?!-)[A-Za-z0-9_.:-]+$"
+    },
+    "port": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 65535
+    },
+    "username": {
+      "type": "string",
+      "pattern": "^(?!-)[A-Za-z0-9_.-]+$"
+    },
+    "remote_home": {
+      "type": "string",
+      "pattern": "^/.*"
+    },
+    "remote_work_root": {
+      "type": "string",
+      "pattern": "^/.*"
+    },
+    "shared_software_policy": {
+      "type": "string",
+      "enum": ["read_only"]
+    },
+    "gpu_policy": {
+      "type": "string",
+      "enum": ["check_before_use"]
+    },
+    "scheduler": {
+      "type": "string",
+      "enum": ["slurm", "ssh-inline"],
+      "description": "Optional remote scheduler. Use slurm when heavy jobs should be queued with sbatch/squeue instead of watched from an interactive shell."
+    },
+    "scheduler_partition": { "type": "string" },
+    "scheduler_account": { "type": "string" },
+    "scheduler_time": {
+      "type": "string",
+      "description": "Optional Slurm --time value for generated heavy-job submissions."
+    },
+    "scheduler_gpu_gres": {
+      "type": "string",
+      "description": "Optional Slurm GPU request such as gpu:1 for GPU-bound methods. CPU-only MD smoke jobs do not use it."
+    },
+    "scheduler_max_queue_wait_minutes": {
+      "type": ["integer", "string"],
+      "minimum": 1,
+      "description": "Projected Slurm waits beyond this many minutes are recorded as an advisory. The generated workflow submits one job and leaves it queued rather than creating a duplicate submission."
+    },
+    "micromamba": { "type": "string" },
+    "docking_env": { "type": "string" },
+    "boltz_env": { "type": "string" },
+    "boltz_weights_readonly": { "type": "string" },
+    "boltz_writable_cache": { "type": "string" },
+    "boltz_checkout": { "type": "string" },
+    "matcha_checkout": { "type": "string" },
+    "matcha_python": { "type": "string" },
+    "matcha_checkpoints": { "type": "string" },
+    "gnina": { "type": "string", "description": "Explicit GNINA wrapper/binary path supplied by the user or local profile." },
+    "smina": { "type": "string", "description": "Explicit SMINA binary path supplied by the user or local profile." },
+    "obabel": { "type": "string", "description": "Explicit Open Babel binary/wrapper path supplied by the user or local profile." },
+    "gromacs": { "type": "string", "description": "Explicit GROMACS gmx binary path supplied by the user or local profile." },
+    "gmx": { "type": "string", "description": "Alias for explicit GROMACS gmx binary path." },
+    "gromacs_ld_library_path": { "type": "string", "description": "Optional LD_LIBRARY_PATH needed by the GROMACS runtime, for example PLUMED libraries." },
+    "ld_library_path": { "type": "string", "description": "Optional LD_LIBRARY_PATH needed by remote runtime commands." },
+    "mdtools_env": { "type": "string", "description": "Optional MD tools environment root used for ligand parameterization helpers." },
+    "acpype": { "type": "string", "description": "Optional ACPYPE executable for ligand topology generation." },
+    "antechamber": { "type": "string", "description": "Optional AmberTools antechamber executable for ligand charge/parameter preparation." },
+    "parmchk2": { "type": "string", "description": "Optional AmberTools parmchk2 executable." },
+    "tleap": { "type": "string", "description": "Optional AmberTools tleap executable." },
+    "ssh_control_master": {
+      "type": ["boolean", "string"],
+      "description": "Optional escape hatch for SSH multiplexing. Defaults to enabled. Set false/0/no to disable ControlMaster for this profile."
+    },
+    "ssh_control_persist": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9]+$",
+      "description": "Optional OpenSSH ControlPersist value. Defaults to 10m."
+    },
+    "ssh_control_path": {
+      "type": "string",
+      "description": "Optional explicit OpenSSH ControlPath. Defaults to a short hash path under the local temp directory."
+    },
+    "ssh_session_persist": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9]+$",
+      "description": "Optional OpenSSH ControlPersist value used by `session open`. Defaults to 8h."
+    }
+  }
+}

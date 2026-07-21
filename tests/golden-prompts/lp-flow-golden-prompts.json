@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "purpose": "Replayable LP-Flow agent-evaluation cases derived from real docking, MD, runtime, and Burrete handoff failures.",
+  "cases": [
+    {
+      "id": "full_3htb_jz4_cpu_pipeline",
+      "prompt": "Do docking of 3HTB and the JZ4 ligand, which is 2-propylphenol, with Boltz and Matcha, then perform molecular dynamics on the top pose. Return results and visualization.",
+      "expected_trace": [
+        "gnina-smina-docking",
+        "boltz",
+        "matcha-scoring",
+        "burrete:molecule-collection",
+        "gromacs-md",
+        "burrete:trajectory-review"
+      ],
+      "required_artifacts": [
+        "run_manifest.json",
+        "summary_wide.csv",
+        "pose_review_status.json",
+        "trajectory_manifest.json",
+        "display_qc.json",
+        "trajectory_review_status.json",
+        "markdown_report"
+      ],
+      "required_final_outputs": [
+        "clickable_docking_burrete_link",
+        "clickable_md_burrete_link",
+        "method_status_table",
+        "md_scope_and_metrics"
+      ],
+      "forbidden_outcomes": [
+        "reference_structure_presented_as_docking_result",
+        "static_file_path_as_visualization_completion",
+        "three_frame_md_display",
+        "followup_offer_before_requested_visualization"
+      ]
+    },
+    {
+      "id": "full_6lr9_russian_pipeline",
+      "prompt": "Сделай редокинг белка 6LR9 лигандом из структуры, с Boltz и Matcha, потом top pose в molecular dynamics. Верни результаты и визуализацию.",
+      "expected_trace": [
+        "gnina-smina-docking",
+        "boltz",
+        "matcha-scoring",
+        "burrete:molecule-collection",
+        "gromacs-md",
+        "burrete:trajectory-review"
+      ],
+      "required_artifacts": [
+        "run_manifest.json",
+        "summary_wide.csv",
+        "pipeline_handoff.json",
+        "pose_review_status.json",
+        "trajectory_manifest.json",
+        "display_qc.json",
+        "trajectory_review_status.json"
+      ],
+      "required_final_outputs": [
+        "clickable_docking_burrete_link",
+        "clickable_md_burrete_link",
+        "method_status_table",
+        "raw_error_for_unavailable_method"
+      ],
+      "forbidden_outcomes": [
+        "local_path_only_runtime_failure",
+        "md_before_pose_review_status",
+        "invented_boltz_or_matcha_score",
+        "followup_offer_before_terminal_state"
+      ]
+    },
+    {
+      "id": "gpu_queue_cpu_fallback",
+      "prompt": "The GPU queue is delayed. Run the useful short CPU workflow and return the completed artifacts.",
+      "expected_trace": [
+        "gnina-smina-docking",
+        "gromacs-md"
+      ],
+      "required_artifacts": [
+        "runtime_status.csv",
+        "run_manifest.json",
+        "cpu_backend_status"
+      ],
+      "required_final_outputs": [
+        "queue_advisory",
+        "cpu_execution_scope",
+        "completed_or_method_unavailable_status"
+      ],
+      "forbidden_outcomes": [
+        "gpu_watcher",
+        "automatic_slurm_cancellation",
+        "claims_cpu_md_is_production_md"
+      ]
+    },
+    {
+      "id": "existing_outputs_two_visualizations",
+      "prompt": "Give me clickable visualization links for the docking pose collection and the completed MD trajectory.",
+      "expected_trace": [
+        "burrete:molecule-collection",
+        "burrete:trajectory-review"
+      ],
+      "required_artifacts": [
+        "pose_review_status.json",
+        "trajectory_review_status.json"
+      ],
+      "required_final_outputs": [
+        "clickable_docking_burrete_link",
+        "clickable_md_burrete_link"
+      ],
+      "forbidden_outcomes": [
+        "plain_pdb_text",
+        "xtc_opened_without_display_pdb",
+        "only_local_file_paths"
+      ]
+    },
+    {
+      "id": "unknown_ligand_chemistry",
+      "prompt": "Run GROMACS MD for this docked ligand, but its charge, protonation, and stereochemistry are unknown.",
+      "expected_trace": [
+        "gromacs-md"
+      ],
+      "required_artifacts": [
+        "run_manifest.json",
+        "chemistry_blocker_status"
+      ],
+      "required_final_outputs": [
+        "explicit_missing_chemistry_assumption"
+      ],
+      "forbidden_outcomes": [
+        "acpype_with_assumed_zero_charge",
+        "fabricated_topology",
+        "md_completion_claim"
+      ]
+    }
+  ]
+}

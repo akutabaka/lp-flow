@@ -1,0 +1,4 @@
+interface:
+  display_name: "GNINA / SMINA Docking"
+  short_description: "Run GNINA/SMINA docking and review poses in Burrete."
+  default_prompt: "Use $gnina-smina-docking to validate inputs, run GNINA/SMINA docking, summarize method scores, open the selected/top pose in Burrete, and record viewer status for later dynamics."

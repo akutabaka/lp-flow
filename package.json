@@ -1,0 +1,24 @@
+{
+  "name": "lp-flow",
+  "version": "0.1.0-rc.2",
+  "private": true,
+  "description": "Codex MCP/CLI plugin for reproducible docking and molecular-dynamics workflows.",
+  "type": "module",
+  "license": "CC-BY-NC-4.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node scripts/run-tests.mjs",
+    "build:source": "node scripts/build-source-release.mjs",
+    "package:source": "node scripts/package-source-release.mjs",
+    "test:static": "node scripts/check-static.mjs",
+    "test:release": "npm run build:source && node scripts/check-source-release.mjs",
+    "test:mcp": "node tests/mcp/check_stdio_conformance.mjs",
+    "test:public": "node tests/contracts/check_public_contract.mjs",
+    "test:skills": "node tests/contracts/check_pipeline_skills_contract.mjs",
+    "test:golden": "node tests/golden-prompts/validate_golden_prompts.mjs",
+    "test:smoke": "node tests/execution/check_pipeline_execution_smoke.mjs",
+    "test:package": "node tests/contracts/check_source_package.mjs"
+  }
+}

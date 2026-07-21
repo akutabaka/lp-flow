@@ -1,0 +1,57 @@
+# Local run outputs and generated artifacts.
+results/
+outputs/
+.lp-flow-runs/
+tmp*/
+**/tmp*/
+viewer-output/
+viewer*/
+screenshots/
+validation-artifacts/
+
+# Generated Mol* / Mol View Stories artifacts.
+*.mvsj
+*.mvsx
+*.mvstory
+*.molx
+
+# Downloaded validation/scientific data should be user-provided, not bundled.
+*.bcif
+
+# Runtime logs and transient files.
+*.log
+*.err.log
+*.stdout.log
+*.stderr.log
+*.tmp
+
+# Screenshot-like validation outputs.
+*.screenshot.png
+*-screenshot.png
+
+# Keep intentional plugin assets. Local runtimes are never published.
+!assets/
+!assets/**
+runtime/
+
+# Local environments, editor files, and platform metadata.
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.env
+.env.*
+!.env.example
+
+# Private connection profiles and distribution archives.
+profiles/
+*.local.json
+*.zip
+*.tar
+*.tar.gz
+dist/

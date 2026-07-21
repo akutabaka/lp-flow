@@ -1,0 +1,366 @@
+{
+  "version": 1,
+  "purpose": "Manual trigger/no-trigger evals for weak-model LP-Flow skill routing.",
+  "cases": [
+    {
+      "query": "Dock these ligands into this receptor and give me a score table.",
+      "expected_skills": [
+        "gnina-smina-docking"
+      ],
+      "not_expected_skills": [
+        "gromacs-md",
+        "boltz"
+      ],
+      "reason": "Clear docking request."
+    },
+    {
+      "query": "Run GNINA and SMINA rescoring for existing poses.",
+      "expected_skills": [
+        "gnina-smina-docking"
+      ],
+      "not_expected_skills": [],
+      "reason": "Focused docking/rescoring request."
+    },
+    {
+      "query": "Set up molecular dynamics for the top docked pose and make a compact trajectory.",
+      "expected_skills": [
+        "gromacs-md"
+      ],
+      "not_expected_skills": [
+        "gnina-smina-docking"
+      ],
+      "reason": "Clear MD request after docking output exists."
+    },
+    {
+      "query": "Do docking, open the top pose, then if it looks ok start MD and visualize the trajectory.",
+      "expected_skills": [
+        "gnina-smina-docking",
+        "burrete:open-workspace",
+        "gromacs-md",
+        "burrete:trajectory-review"
+      ],
+      "not_expected_skills": [
+        "boltz"
+      ],
+      "reason": "Multi-step chain includes Burrete pose review before MD and Burrete trajectory review after MD."
+    },
+    {
+      "query": "Use Matcha on these receptor-ligand poses and compare with the GNINA table.",
+      "expected_skills": [
+        "matcha-scoring"
+      ],
+      "not_expected_skills": [
+        "boltz",
+        "gromacs-md"
+      ],
+      "reason": "Explicit Matcha scoring request."
+    },
+    {
+      "query": "Use Boltz-2 to co-fold this protein with a SMILES ligand and report affinity.",
+      "expected_skills": [
+        "boltz"
+      ],
+      "not_expected_skills": [
+        "gnina-smina-docking",
+        "matcha-scoring"
+      ],
+      "reason": "Explicit co-folding/affinity prediction request."
+    },
+    {
+      "query": "Open this SDF pose collection in the viewer.",
+      "expected_skills": [
+        "burrete:molecule-collection"
+      ],
+      "not_expected_skills": [
+        "gnina-smina-docking"
+      ],
+      "reason": "Visualization-only request."
+    },
+    {
+      "query": "Open this XTC and TPR trajectory and let me inspect it.",
+      "expected_skills": [
+        "burrete:trajectory-review"
+      ],
+      "not_expected_skills": [
+        "gromacs-md"
+      ],
+      "reason": "Review existing trajectory, not run MD."
+    },
+    {
+      "query": "Run a CPU smoke MD, EM plus short NVT only.",
+      "expected_skills": [
+        "gromacs-md"
+      ],
+      "not_expected_skills": [],
+      "reason": "MD execution with explicit CPU smoke scope."
+    },
+    {
+      "query": "Generate conformers for a reference ligand.",
+      "expected_skills": [],
+      "not_expected_skills": [
+        "gromacs-md",
+        "boltz",
+        "matcha-scoring"
+      ],
+      "reason": "Ligand prep/conformer generation is not one of these focused skills."
+    },
+    {
+      "query": "Prepare a report paragraph for my curator about what the MD skill can do.",
+      "expected_skills": [],
+      "not_expected_skills": [
+        "gromacs-md"
+      ],
+      "reason": "Writing/reporting request, not execution."
+    },
+    {
+      "query": "Predict whether this designed binder forms an interface with my target protein.",
+      "expected_skills": [
+        "boltz"
+      ],
+      "not_expected_skills": [
+        "gnina-smina-docking"
+      ],
+      "reason": "Protein binder co-folding, not small-molecule docking."
+    },
+    {
+      "query": "Score this ligand with Vina-style docking only; no CNN model.",
+      "expected_skills": [
+        "gnina-smina-docking"
+      ],
+      "not_expected_skills": [
+        "matcha-scoring",
+        "boltz"
+      ],
+      "reason": "SMINA/Vina-style route under docking skill."
+    },
+    {
+      "query": "My ligand charge is unknown; start GROMACS topology generation.",
+      "expected_skills": [
+        "gromacs-md"
+      ],
+      "not_expected_skills": [
+        "gnina-smina-docking"
+      ],
+      "reason": "MD skill should stop before ligand topology until chemistry is set."
+    },
+    {
+      "query": "Run docking and then immediately start MD without opening the pose.",
+      "expected_skills": [
+        "gnina-smina-docking"
+      ],
+      "not_expected_skills": [
+        "boltz"
+      ],
+      "reason": "Multi-step chain should route through pose review before MD."
+    },
+    {
+      "query": "Dock this ligand, run MD, and visualize the trajectory.",
+      "expected_skills": [
+        "gnina-smina-docking",
+        "burrete:molecule-collection",
+        "gromacs-md",
+        "burrete:trajectory-review"
+      ],
+      "not_expected_skills": [
+        "boltz"
+      ],
+      "reason": "Requested chain should proceed through docking, pose review, MD, and trajectory review without asking for a continue choice.",
+      "must_include_concepts": [
+        "finish requested handoffs before final answer or report a real blocker",
+        "run_manifest.json with phase spans, method statuses, logs, and artifacts",
+        "markdown report with stepwise debug trace",
+        "bounded multi-model PDB as visualization display file",
+        "native trajectory/topology files for interpretation and provenance",
+        "bounded no-water multi-model PDB as visualization display file",
+        "compact no-bulk-water preview topology or metadata",
+        "full native topology/trajectory kept for interpretation and provenance",
+        "multi-frame no-water display PDB for trajectory visualization",
+        "single GRO/final snapshot is provenance, not trajectory preview",
+        "Burrete top-pose review/open status before MD",
+        "pose package plus Burrete link/status passed to MD",
+        "per-method status rows for failed/unavailable methods",
+        "best available valid pose artifact continues downstream",
+        "artifact-only MD package when visualization is unavailable but inputs are valid",
+        "all viable fallback paths attempted or recorded"
+      ],
+      "must_not_include_concepts": [
+        "if you want, i can continue",
+        "i can continue in the next message",
+        "offer to finish the requested last stage later",
+        "docking scores without Burrete opened/unavailable status",
+        "remote Matcha command uses local Windows path",
+        "declares all methods unavailable from local PATH without configured profile/plugin probe",
+        "missing run_manifest.json for full pipeline",
+        "report lacks command/log/artifact statuses",
+        "final handoff as a next step",
+        "open xtc alone as visualization display",
+        "bulk water in local preview topology",
+        "full solvated topology as preview display file",
+        "gigabyte-scale preview topology",
+        "open gro snapshot as trajectory visualization",
+        "single final structure as completed trajectory preview",
+        "water-heavy gro as preview display",
+        "trajectory visualization without trajectory-derived display frames",
+        "start MD before Burrete top-pose review",
+        "skip Burrete pose preview before MD",
+        "MD handoff without Burrete pose link/status",
+        "stop because one optional method failed while another valid pose exists",
+        "ask user to choose between repairing optional runtime and producing fallback artifact",
+        "discard Matcha best pose because optional score fields are unavailable"
+      ]
+    },
+    {
+      "query": "Show me the docking poses in Mol*.",
+      "expected_skills": [
+        "burrete:molecule-collection"
+      ],
+      "not_expected_skills": [
+        "gnina-smina-docking",
+        "gromacs-md"
+      ],
+      "reason": "Mol* viewing of existing docking poses should use the installed Burrete pose-review target."
+    },
+    {
+      "query": "Open the MD trajectory.",
+      "expected_skills": [
+        "burrete:trajectory-review"
+      ],
+      "not_expected_skills": [
+        "gromacs-md",
+        "gnina-smina-docking"
+      ],
+      "reason": "Opening an existing trajectory is a Burrete trajectory-review task, not a new MD run."
+    },
+    {
+      "query": "Dock and visualize the best poses.",
+      "expected_skills": [
+        "gnina-smina-docking",
+        "burrete:molecule-collection"
+      ],
+      "not_expected_skills": [
+        "gromacs-md",
+        "boltz"
+      ],
+      "reason": "Docking plus visualization should not stop at the docking report."
+    },
+    {
+      "query": "Use external MSA server for these confidential protein sequences.",
+      "expected_skills": [
+        "boltz"
+      ],
+      "not_expected_skills": [
+        "gnina-smina-docking"
+      ],
+      "reason": "Boltz should surface MSA privacy policy."
+    },
+    {
+      "query": "Just tell me what time it is.",
+      "expected_skills": [],
+      "not_expected_skills": [],
+      "reason": "Non-LP-Flow request."
+    },
+    {
+      "query": "Do redocking for PDB 6LR9 with its bound ligand, run Boltz and Matcha, put the top pose into MD, and return results plus visualization.",
+      "expected_skills": [
+        "gnina-smina-docking",
+        "boltz",
+        "matcha-scoring",
+        "burrete:open-workspace",
+        "gromacs-md",
+        "burrete:trajectory-review"
+      ],
+      "not_expected_skills": [],
+      "reason": "Full multi-step workflow includes docking, optional scoring/prediction statuses, pose review, MD artifacts, and Burrete trajectory link/status.",
+      "must_include_concepts": [
+        "finish requested handoffs before final answer or report a real blocker",
+        "run_manifest.json with phase spans, method statuses, logs, and artifacts",
+        "markdown report with stepwise debug trace",
+        "bounded multi-model PDB as visualization display file",
+        "native trajectory/topology files for interpretation and provenance",
+        "bounded no-water multi-model PDB as visualization display file",
+        "compact no-bulk-water preview topology or metadata",
+        "full native topology/trajectory kept for interpretation and provenance",
+        "multi-frame no-water display PDB for trajectory visualization",
+        "single GRO/final snapshot is provenance, not trajectory preview",
+        "Burrete top-pose review/open status before MD",
+        "pose package plus Burrete link/status passed to MD",
+        "per-method status rows for failed/unavailable methods",
+        "best available valid pose artifact continues downstream",
+        "artifact-only MD package when visualization is unavailable but inputs are valid",
+        "all viable fallback paths attempted or recorded",
+        "runtime_status.csv with component status and raw error"
+      ],
+      "must_not_include_concepts": [
+        "if you want, i can continue",
+        "i can continue in the next message",
+        "offer to finish the requested last stage later",
+        "docking scores without Burrete opened/unavailable status",
+        "remote Matcha command uses local Windows path",
+        "declares all methods unavailable from local PATH without configured profile/plugin probe",
+        "missing run_manifest.json for full pipeline",
+        "report lacks command/log/artifact statuses",
+        "final handoff as a next step",
+        "open xtc alone as visualization display",
+        "bulk water in local preview topology",
+        "full solvated topology as preview display file",
+        "gigabyte-scale preview topology",
+        "open gro snapshot as trajectory visualization",
+        "single final structure as completed trajectory preview",
+        "water-heavy gro as preview display",
+        "trajectory visualization without trajectory-derived display frames",
+        "start MD before Burrete top-pose review",
+        "skip Burrete pose preview before MD",
+        "MD handoff without Burrete pose link/status",
+        "stop because one optional method failed while another valid pose exists",
+        "ask user to choose between repairing optional runtime and producing fallback artifact",
+        "discard Matcha best pose because optional score fields are unavailable"
+      ]
+    },
+    {
+      "query": "Redock protein 6LR9 with its structure ligand using Boltz and Matcha, then run molecular dynamics on the top pose. Return results and visualization.",
+      "expected_skills": [
+        "gnina-smina-docking",
+        "boltz",
+        "matcha-scoring",
+        "burrete:open-workspace",
+        "gromacs-md",
+        "burrete:trajectory-review"
+      ],
+      "not_expected_skills": [],
+      "reason": "A direct full-pipeline request should route to the focused docking, scoring, MD, and visualization skills.",
+      "must_include_concepts": [
+        "finish requested handoffs before final answer or report a real blocker",
+        "run_manifest.json with phase spans, method statuses, logs, and artifacts",
+        "markdown report with stepwise debug trace",
+        "Burrete top-pose review/open status before MD",
+        "bounded no-water multi-model PDB as visualization display file",
+        "multi-frame no-water display PDB for trajectory visualization",
+        "runtime_status.csv with component status and raw error"
+      ],
+      "must_not_include_concepts": [
+        "if you want, i can continue",
+        "i can continue in the next message",
+        "offer to finish the requested last stage later",
+        "declares all methods unavailable from local PATH without configured profile/plugin probe",
+        "docking scores without Burrete opened/unavailable status",
+        "final handoff as a next step",
+        "open xtc alone as visualization display",
+        "open gro snapshot as trajectory visualization",
+        "trajectory visualization without trajectory-derived display frames"
+      ]
+    },
+    {
+      "query": "Give me visualization links for the docking poses and MD trajectory outputs.",
+      "expected_skills": [
+        "burrete:open-workspace"
+      ],
+      "not_expected_skills": [
+        "gnina-smina-docking",
+        "gromacs-md",
+        "boltz",
+        "matcha-scoring"
+      ],
+      "reason": "Links for existing molecular outputs are a Burrete opening task, not a request to print PDB text or rerun science."
+    }
+  ]
+}

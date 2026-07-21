@@ -1,0 +1,4 @@
+interface:
+  display_name: "Boltz"
+  short_description: "Boltz cofolding, confidence, and small-molecule affinity."
+  default_prompt: "Use $boltz to prepare a Boltz YAML, run prediction, parse confidence JSON, and report optional ligand affinity as computational triage."
