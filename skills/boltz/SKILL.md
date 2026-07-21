@@ -6,7 +6,7 @@ description: >
   github.com/jwohlwend/boltz): co-folding with SMILES or CCD ligands,
   confidence ranking, and optional protein-ligand affinity as a computational
   triage signal, using the configured local machine or server profile.
-license: CC-BY-NC-4.0
+license: MIT
 metadata:
   lp-flow-compatibility: Requires LP-Flow, Node.js 20+, and a configured Boltz runtime; GPU and network-backed MSA may be optional.
   lp-flow-category: biomodels

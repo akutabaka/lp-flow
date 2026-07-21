@@ -8,9 +8,9 @@ visualization software.
 
 ## 2. Install And Verify
 
-This release candidate is source-available for non-commercial use. Follow
-[Installation](installation.md) to add it to a local or Git marketplace, install
-it, and begin a new Codex session. Verify the source entrypoint before or after
+LP-Flow is released under the [MIT License](../LICENSE). Follow
+[Installation](installation.md) to add it to a local marketplace, install it,
+and begin a new Codex session. Verify the source entrypoint before or after
 installation:
 
 ```bash

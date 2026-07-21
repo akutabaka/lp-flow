@@ -6,7 +6,7 @@ description: >
   pose rescoring, GNINA CNN fields, SMINA/Vina-style scores, and top-pose
   packages for Burrete/Mol* review or later dynamics through the configured
   local machine/server profile.
-license: CC-BY-NC-4.0
+license: MIT
 metadata:
   lp-flow-compatibility: Requires LP-Flow and configured GNINA or SMINA tooling; GNINA CNN scoring may require GPU support.
   lp-flow-category: docking

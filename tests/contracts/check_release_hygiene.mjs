@@ -39,9 +39,9 @@ assert(manifest.name === 'lp-flow', 'manifest name must be lp-flow');
 assert(manifest.version === packageJson.version, 'manifest and package versions must match');
 assert((manifest.interface?.defaultPrompt || []).length <= 3, 'manifest exposes more than three default prompts');
 assert(manifest.license === packageJson.license, 'manifest and package license states must match');
-assert(manifest.license === 'CC-BY-NC-4.0', 'public release must declare CC-BY-NC-4.0');
+assert(manifest.license === 'MIT', 'public release must declare MIT');
 assert(existsSync(path.join(root, 'LICENSE')), 'public release must include a LICENSE notice');
-assert(read('LICENSE').includes('creativecommons.org/licenses/by-nc/4.0/'), 'LICENSE must link to the CC BY-NC 4.0 legal code');
+assert(read('LICENSE').includes('MIT License'), 'LICENSE must include the MIT legal text');
 
 const binaryExtensions = /\.(?:png|jpe?g|gif|webp|bcif|xtc|trr|tpr)$/i;
 const combined = filesUnder().filter(file => !binaryExtensions.test(file)).map(file => readFileSync(file, 'utf8')).join('\n');

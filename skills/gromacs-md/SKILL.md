@@ -6,7 +6,7 @@ description: >
   CPU smoke MD, RMSD/RMSF, protein-ligand MD, membrane MD, nucleic-acid MD,
   trajectory cleanup, explicitly requested production MD, and opening/reviewing
   MD trajectories, using the configured local/server profile.
-license: CC-BY-NC-4.0
+license: MIT
 metadata:
   lp-flow-compatibility: Requires LP-Flow, GROMACS, and a compatible ligand-parameterization path; GPU is optional.
   lp-flow-category: molecular-dynamics

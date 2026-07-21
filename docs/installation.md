@@ -1,6 +1,6 @@
 # Installation
 
-LP-Flow is a source-available Codex plugin. It requires Node.js 20 or newer,
+LP-Flow is an MIT-licensed Codex plugin. It requires Node.js 20 or newer,
 an installed Codex or ChatGPT desktop host, and a marketplace entry.
 
 ## Local Marketplace

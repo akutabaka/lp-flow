@@ -1,124 +1,90 @@
 # LP-Flow
 
-Project home: [github.com/akutabaka/lp-flow](https://github.com/akutabaka/lp-flow).
+**A Codex plugin for staged molecular workflows: docking, co-folding, optional
+rescoring, molecular dynamics, and interactive result review.**
 
-`lp-flow` is a reusable Codex MCP/CLI plugin for protein-ligand
-docking workflows, Boltz scoring/cofolding, molecular-dynamics job control, and
-Burrete handoff.
+[![CI](https://github.com/akutabaka/lp-flow/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/akutabaka/lp-flow/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/akutabaka/lp-flow?include_prereleases&label=release)](https://github.com/akutabaka/lp-flow/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-0f766e.svg)](LICENSE)
 
-## Distribution And Installation
+![LP-Flow architecture](assets/diagrams/lp-flow-architecture.png)
 
-This release candidate is source-available for non-commercial use. It requires
-Node.js 20 or newer and an installed Codex host. Follow the exact local or Git
-marketplace procedure in [Installation](docs/installation.md), then begin a new
-Codex session so its skills and MCP server are discovered. Verify the local
-source before or after installation with:
+## What Is LP-Flow?
+
+LP-Flow is a reusable Codex MCP/CLI plugin for protein-ligand docking,
+Boltz co-folding and confidence triage, optional Matcha rescoring, and
+GROMACS molecular dynamics. It validates inputs, produces staged run packages,
+preserves manifests and scientific artifacts, and hands pose or trajectory
+packages to [Burrete](https://github.com/SergeiNikolenko/Burrete) for review.
+
+The plugin does not bundle scientific engines, credentials, model weights,
+private profiles, or user data. Those remain in the user's execution
+environment and task workspace.
+
+## Workflow
+
+![LP-Flow workflow](assets/diagrams/from-molecule-to-review.png)
+
+1. Define a receptor, ligand, and binding site.
+2. Validate inputs and prepare an explicit run package.
+3. Run configured docking, Boltz, or optional Matcha methods.
+4. Preserve result status and select a reviewable pose.
+5. Review poses and trajectories in Burrete; continue the selected complex to
+   GROMACS MD when requested.
+
+## Quick Start
+
+LP-Flow requires Node.js 20+ and a Codex host. Create a local marketplace using
+the exact layout in [Installation](docs/installation.md), install LP-Flow, and
+start a new Codex session.
+
+Verify the source entrypoint before or after installation:
 
 ```bash
 node scripts/lp-flow.mjs status
 node scripts/lp-flow.mjs list-tools
 ```
 
-LP-Flow does not bundle scientific engines, credentials, model weights, or
-external visualization software.
+## Capabilities
 
-The plugin provides run-package helpers, docking-result inspection, and
-Burrete-ready outputs. It ships code, manifests, docs, scripts, skills, and
-viewer handoff helpers.
-Scientific datasets, user run artifacts, downloaded inputs, and generated
-stories live in user-selected output folders.
+| Lane | What LP-Flow prepares or runs |
+| --- | --- |
+| Docking | GNINA/SMINA docking, redocking, rescoring, pose packages, and summaries |
+| Co-folding | Boltz-2 complex prediction, confidence ranking, and affinity triage |
+| Rescoring | Optional Matcha scoring when its runtime, checkpoints, and parser are configured |
+| Dynamics | GROMACS EM/NVT/NPT or explicitly requested production workflows, cleanup, and metrics |
+| Review | Burrete pose collections and trajectory handoff with recorded open/status evidence |
 
-Users provide all scientific inputs explicitly. Generated outputs go to
-user-provided output directories.
+## Burrete Integration
 
-Interactive molecular visualization, pose review, trajectory review, and scene
-controls use Burrete by default. The visualization flow is:
+Burrete is an external molecular workspace. LP-Flow prepares receptor/pose and
+trajectory display packages, requests the Burrete handoff, and records its link
+or exact unavailable status. A static PNG is a report thumbnail, not completed
+interactive visualization. If Burrete is unavailable, LP-Flow preserves the
+scientific package and records visualization separately from scientific method
+status.
 
-```text
-Burrete plugin -> handoff package -> open attempt -> link/status in chat
+## Documentation
+
+- [Installation](docs/installation.md)
+- [Quickstart](docs/quickstart.md)
+- [Architecture](docs/architecture.md)
+- [MCP and CLI surface](docs/mcp-as-cli.md)
+- [MD protocols](docs/md-protocols.md)
+- [Profiles](docs/profiles.md)
+- [Golden prompts](docs/golden-prompts.md)
+- [Security policy](SECURITY.md)
+
+The automated suite covers public MCP contracts, skills, golden prompts,
+non-destructive execution smoke behavior, source hygiene, and extracted release
+packages. Run it from the plugin root with:
+
+```bash
+npm test
 ```
-
-PNGs remain report thumbnails. A completed visualization has an opened Burrete
-workspace link/status; a package that cannot be opened remains unavailable or
-pending, not completed.
-
-## Visualization Dependency
-
-Burrete is an external Codex visualization plugin, not part of LP-Flow. LP-Flow
-prepares receptor/pose and trajectory display packages, requests the Burrete
-handoff, and reports its link or exact unavailable status. Without an available
-Burrete target, LP-Flow retains the package and reports that visualization was
-not opened; this does not invalidate otherwise completed docking or MD outputs.
-Legacy Mol* story helpers are compatibility-only and are not the ordinary
-visualization route.
-
-## Command Families
-
-- `run docking` - create local docking run packages from explicit configs.
-- `md ...` - submit explicit run-local MD scripts, inspect logs/results,
-  analyze TPR files, and write trajectory review manifests.
-- `plugin_status` / `list-tools` - inspect the public MCP/CLI surface.
-
-Deprecated compatibility aliases are hidden from normal help and emit warnings
-when used.
-
-Low-level `build-*`, execution helper, and planned/guarded modes are available
-only through direct compatibility routes and `--help --advanced` /
-`--help --internal`.
-
-## Public API Contract Check
-
-Run the local public API contract test from the plugin root:
-
-```powershell
-node .\tests\contracts\check_public_contract.mjs
-```
-
-The check verifies the compact Phase 1 CLI/MCP surface, public schemas,
-planned-mode guards, deprecated-alias warnings, and source-tree artifact hygiene.
-
-## Pipeline Skills Contract Check
-
-Run the lightweight full-pipeline skill contract check from the plugin root:
-
-```powershell
-node .\tests\contracts\check_pipeline_skills_contract.mjs
-```
-
-The check verifies source/cache skill sync, focused Boltz/Matcha/docking/MD
-trigger wording, docking -> MD -> Burrete handoff instructions, and public
-CLI discovery. It also checks completion contracts for visualization requests:
-static files alone are not completed visualization without a Burrete link or
-exact open status. It does not run docking, MD, server, SSH, browser, or
-visualization workflows.
-
-## Pipeline Execution Smoke Check
-
-Run the local execution smoke check from the plugin root:
-
-```powershell
-node .\tests\execution\check_pipeline_execution_smoke.mjs
-```
-
-The check creates a temporary receptor/ligand/config/profile, executes the
-public `run docking` package-generation path, validates dry-run remote execution
-steps, validates Slurm test-only/GRES planning, MD review gates and dry-run
-submission, and checks trajectory artifact QC. It does not start real docking,
-MD, SSH, Slurm jobs, browser, or viewer
-servers by default. Add `--allow-viewer-server` to also start a temporary local
-trajectory viewer smoke test.
-
-Detailed user and developer documentation lives in `docs/`. Skills stay compact:
-each focused skill is a `SKILL.md` with optional agent metadata.
-
-LP-Flow requires Node.js 20 or newer. Scientific engines are supplied by the
-execution environment rather than bundled with the plugin.
 
 ## License
 
-LP-Flow is source-available under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/): it may be shared and adapted with attribution for non-commercial use. It is not described as OSI open-source software.
-Third-party tools and models retain their own terms.
-
-Docking, runtime, and MD helper scripts live under plugin-level `scripts/`.
-The built-in MD lane records its exact force-field protocol and never claims
-equivalence to a named external tutorial without its required force-field inputs.
+LP-Flow is released under the [MIT License](LICENSE). Third-party tools,
+models, checkpoints, and external services retain their own terms; see
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

@@ -114,7 +114,7 @@ function checkSkillFrontmatter() {
     const keys = lines.map(line => /^([A-Za-z][A-Za-z0-9-]*):/.exec(line)?.[1]).filter(Boolean);
     assert(keys.every(key => allowed.has(key)), `${entry.name}: unsupported frontmatter field(s): ${keys.filter(key => !allowed.has(key)).join(', ')}`);
     assert(keys.includes('name') && match[1].includes(`name: ${entry.name}`), `${entry.name}: name must match skill directory`);
-    assert(match[1].includes('license: CC-BY-NC-4.0'), `${entry.name}: skill license must match LP-Flow`);
+    assert(match[1].includes('license: MIT'), `${entry.name}: skill license must match LP-Flow`);
     const metadataIndex = lines.findIndex(line => line === 'metadata:');
     assert(metadataIndex >= 0, `${entry.name}: metadata is required`);
     if (metadataIndex >= 0) {

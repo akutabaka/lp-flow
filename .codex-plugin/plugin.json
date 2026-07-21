@@ -1,6 +1,6 @@
 {
   "name": "lp-flow",
-  "version": "0.1.0-rc.2",
+  "version": "0.1.0-rc.3",
   "description": "LP-Flow docking and molecular dynamics workflows with GNINA/SMINA, Boltz, Matcha, GROMACS, configured compute runtimes, and Burrete handoff.",
   "author": {
     "name": "akutabaka",
@@ -8,7 +8,7 @@
   },
   "homepage": "https://github.com/akutabaka/lp-flow",
   "repository": "https://github.com/akutabaka/lp-flow",
-  "license": "CC-BY-NC-4.0",
+  "license": "MIT",
   "keywords": [
     "docking",
     "lp-flow",

@@ -1,10 +1,10 @@
 {
   "name": "lp-flow",
-  "version": "0.1.0-rc.2",
+  "version": "0.1.0-rc.3",
   "private": true,
   "description": "Codex MCP/CLI plugin for reproducible docking and molecular-dynamics workflows.",
   "type": "module",
-  "license": "CC-BY-NC-4.0",
+  "license": "MIT",
   "engines": {
     "node": ">=20"
   },

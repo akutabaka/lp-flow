@@ -5,7 +5,7 @@ description: >
   Matcha runtime, checkpoints, and parser support are available. Use to score
   existing poses, compare Matcha with GNINA/SMINA/Boltz outputs, or add Matcha
   fields to a docking summary through the configured profile/checkpoints.
-license: CC-BY-NC-4.0
+license: MIT
 metadata:
   lp-flow-compatibility: Requires LP-Flow plus a configured Matcha checkout, checkpoints, parser support, receptor, and pose inputs.
   lp-flow-category: docking
