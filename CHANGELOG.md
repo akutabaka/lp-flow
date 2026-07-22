@@ -4,6 +4,8 @@ All notable changes to LP-Flow are documented here.
 
 ## [Unreleased]
 
+## [0.1.0-rc.5] - 2026-07-22
+
 - Removed unused profile, case-discovery, input-validation, and MCP launcher
   duplicates from the public source tree.
 - Consolidated the execution security boundary into `SECURITY.md` and removed
