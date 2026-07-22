@@ -1,6 +1,6 @@
 {
   "name": "lp-flow",
-  "version": "0.1.0-rc.5",
+  "version": "0.1.0-rc.6",
   "description": "LP-Flow docking and molecular dynamics workflows with GNINA/SMINA, Boltz, Matcha, GROMACS, configured execution environments, and Burrete handoff.",
   "author": {
     "name": "akutabaka",

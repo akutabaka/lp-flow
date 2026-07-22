@@ -28,8 +28,8 @@ artifacts, then hands off to Burrete before MD:
 
 ```text
 upload -> preflight -> check_docking_scheduler -> run_docking_payload -> check_docking_payload_status
--> open_burrete_pose_review -> check_md_scheduler -> run_md_from_best_pose
--> check_md_from_best_pose_status -> open_burrete_trajectory_review
+-> record_burrete_pose_receipt -> check_md_scheduler -> run_md_from_best_pose
+-> check_md_from_best_pose_status -> record_burrete_trajectory_receipt
 -> package_results -> download_archive
 ```
 
@@ -51,16 +51,26 @@ Public:
 - `lp_flow_prepare_redocking_case`
 - `lp_flow_remote_command_plan`
 - `lp_flow_remote_execute_step`
+- `lp_flow_prepare_burrete_request`
+- `lp_flow_record_burrete_receipt`
 
 Internal maintenance tools may appear only when internal discovery is
 explicitly requested. A normal public MCP `tools/call` rejects tools outside
 public visibility. Structures, poses, and trajectories are handed to Burrete
 for visualization.
 
-`open_burrete_pose_review` and `open_burrete_trajectory_review` are recorded
-handoff gates. After the Burrete attempt, call the step with an exact
-`handoff_status` and `execute=true`; the executor writes the run-local status
-artifact. MD submission is blocked until pose review is recorded.
+`record_burrete_pose_receipt` and `record_burrete_trajectory_receipt` are
+verified handoff gates. Pass a typed receipt and `execute=true`; the executor
+writes the run-local status artifact. MD submission requires a verified pose
+receipt. The compatibility aliases `open_burrete_pose_review` and
+`open_burrete_trajectory_review` resolve to these receipt steps.
+
+Generate or validate the same contracts directly:
+
+```bash
+lp-flow burrete request --kind docking_pose_review --receptor receptor.pdb --poses poses.sdf --out burrete_request.json
+lp-flow burrete receipt --request burrete_request.json --receipt burrete_receipt.json --out pose_review_status.json
+```
 
 ## Execution Policy
 

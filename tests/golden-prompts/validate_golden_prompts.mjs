@@ -27,8 +27,9 @@ for (const [index, item] of (data.cases || []).entries()) {
 }
 
 const full = data.cases.find(item => item.id === 'full_3htb_jz4_cpu_pipeline');
-assert(full?.expected_trace?.includes('burrete:molecule-collection'), '3HTB case must include docking Burrete review');
-assert(full?.expected_trace?.includes('burrete:trajectory-review'), '3HTB case must include MD Burrete review');
+assert(full?.expected_trace?.includes('open_burrete_docking_view'), '3HTB case must include docking Burrete review');
+assert(full?.expected_trace?.includes('validate_trajectory_review_artifact'), '3HTB case must validate the MD review artifact');
+assert(full?.expected_trace?.includes('burrete.open_workspace'), '3HTB case must include MD Burrete review');
 assert(full?.required_final_outputs?.includes('clickable_docking_burrete_link'), '3HTB case must require a docking link');
 assert(full?.required_final_outputs?.includes('clickable_md_burrete_link'), '3HTB case must require an MD link');
 

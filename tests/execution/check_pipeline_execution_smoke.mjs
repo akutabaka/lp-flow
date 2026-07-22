@@ -283,7 +283,7 @@ function checkDockingRunPackage(fixture) {
   const mdScript = readFileSync(path.join(fixture.packageDir, 'scripts', 'run_md_from_best_pose.sh'), 'utf8');
   assert(mdScript.includes('pipeline_handoff.json not found'), 'downstream MD script: expected docking handoff guard');
   assert(mdScript.includes('pose_review_status.json not found'), 'downstream MD script: expected recorded Burrete review guard');
-  assert(mdScript.includes("review_status not in {'opened', 'reviewed', 'unavailable'}"), 'downstream MD script: expected exact review status gate');
+  assert(mdScript.includes("review.get('status') != 'verified'"), 'downstream MD script: expected verified receipt gate');
   assert(mdScript.includes('MD_SMOKE_OK'), 'downstream MD script: expected terminal success marker');
   assert(mdScript.includes('chemistry_h.mol2'), 'downstream MD script: expected clean ligand chemistry for ACPYPE');
   assert(mdScript.includes('place_ligand_from_pose.py'), 'downstream MD script: expected validated pose-placement helper');
@@ -347,7 +347,7 @@ function checkRemoteDryRunExecutionPlan(fixture) {
   );
   assert(plan?.ok === true, 'remote-command-plan: expected ok=true');
   const stepNames = (plan?.steps || []).map(step => step.step);
-  for (const step of ['create_remote', 'upload', 'preflight', 'check_docking_scheduler', 'run_docking_payload', 'check_docking_payload_status', 'open_burrete_pose_review', 'check_md_scheduler', 'run_md_from_best_pose', 'check_md_from_best_pose_status', 'open_burrete_trajectory_review', 'package_results', 'download_archive', 'cleanup']) {
+  for (const step of ['create_remote', 'upload', 'preflight', 'check_docking_scheduler', 'run_docking_payload', 'check_docking_payload_status', 'record_burrete_pose_receipt', 'check_md_scheduler', 'run_md_from_best_pose', 'check_md_from_best_pose_status', 'record_burrete_trajectory_receipt', 'package_results', 'download_archive', 'cleanup']) {
     assert(stepNames.includes(step), `remote-command-plan: missing step ${step}`);
   }
   assert(!stepNames.includes('gpu_watcher'), 'remote-command-plan: gpu_watcher must not be a default execution step');
@@ -365,16 +365,16 @@ function checkRemoteDryRunExecutionPlan(fixture) {
   assert(payloadCommand.includes('.lp_flow_remote_payload.lock'), 'remote-command-plan: run_docking_payload must include the remote single-run lock');
   assert(payloadCommand.includes('lock was stale; removing'), 'remote-command-plan: run_docking_payload must clean stale locks before failing active runs');
   assert(!payloadCommand.includes('gpu_watcher.sh'), 'remote-command-plan: run_docking_payload must not use GPU watcher as default');
-  const poseReview = (plan?.steps || []).find(step => step.step === 'open_burrete_pose_review');
-  assert(poseReview?.handoff === true && poseReview?.target === 'burrete:molecule-collection', 'remote-command-plan: expected Burrete pose handoff before MD');
+  const poseReview = (plan?.steps || []).find(step => step.step === 'record_burrete_pose_receipt');
+  assert(poseReview?.handoff === true && poseReview?.recommended_tools?.[0] === 'open_burrete_docking_view', 'remote-command-plan: expected real Burrete docking tool before MD');
   assert(poseReview?.status_file?.endsWith('/results/pose_review_status.json'), 'remote-command-plan: expected persistent pose-review status artifact');
   const mdStep = (plan?.steps || []).find(step => step.step === 'run_md_from_best_pose');
   const mdCommand = mdStep?.commands?.[0]?.command_line || '';
   assert(mdStep?.resource_intensive === true, 'remote-command-plan: downstream MD step must be resource_intensive');
   assert(mdCommand.includes('scripts/run_md_from_best_pose.sh'), 'remote-command-plan: downstream MD step must call run_md_from_best_pose.sh');
   assert(mdStep?.precondition_command?.command_line?.includes('pose_review_status.json'), 'remote-command-plan: MD must enforce recorded pose-review status before submit');
-  const trajectoryReview = (plan?.steps || []).find(step => step.step === 'open_burrete_trajectory_review');
-  assert(trajectoryReview?.handoff === true && trajectoryReview?.target === 'burrete:trajectory-review', 'remote-command-plan: expected Burrete trajectory handoff after MD');
+  const trajectoryReview = (plan?.steps || []).find(step => step.step === 'record_burrete_trajectory_receipt');
+  assert(trajectoryReview?.handoff === true && trajectoryReview?.recommended_tools?.includes('burrete.open_workspace'), 'remote-command-plan: expected real Burrete trajectory tools after MD');
   const cleanup = (plan?.steps || []).find(step => step.step === 'cleanup');
   assert(cleanup?.disabled === true && cleanup?.destructive === true, 'remote-command-plan: cleanup must be disabled/destructive');
 
@@ -433,7 +433,7 @@ function checkRemoteDryRunExecutionPlan(fixture) {
 
   const missingReviewStatus = parseJson(
     runCli(
-      ['remote-execute-step', '--package-dir', fixture.packageDir, '--profile-path', fixture.profilePath, '--step', 'open_burrete_pose_review'],
+      ['remote-execute-step', '--package-dir', fixture.packageDir, '--profile-path', fixture.profilePath, '--step', 'record_burrete_pose_receipt'],
       'remote-execute-step missing handoff status',
       { expectStatus: 1 },
     ),
@@ -441,15 +441,21 @@ function checkRemoteDryRunExecutionPlan(fixture) {
   );
   assert(missingReviewStatus?.blocked === true, 'remote-execute-step pose review: missing exact handoff status must block completion');
 
+  const receipt = JSON.stringify({
+    request_id: `${plan.run_id}:docking-pose-review`, status: 'verified', workspaceSessionId: 'ws-smoke', url: 'burrete://audit',
+    activeDocument: { path: 'poses.sdf', ready: true },
+    viewer: { agentAvailable: true, agentReady: true, viewerReady: true },
+    visualQa: { canvasNonblank: true, poseCount: 1, poseNavigationVerified: true },
+  });
   const reviewRecordDryRun = parseJson(
     runCli([
       'remote-execute-step', '--package-dir', fixture.packageDir, '--profile-path', fixture.profilePath,
-      '--step', 'open_burrete_pose_review', '--handoff-status', 'opened', '--handoff-url', 'burrete://audit',
+      '--step', 'open_burrete_pose_review', '--receipt-json', receipt,
     ], 'remote-execute-step handoff record dry-run'),
     'remote-execute-step handoff record dry-run',
   );
-  assert(reviewRecordDryRun?.ok === true && reviewRecordDryRun?.executed === false, 'remote-execute-step pose review: exact status should produce a safe record dry-run');
-  assert(reviewRecordDryRun?.result_links?.[0]?.url === 'burrete://audit', 'remote-execute-step pose review: opened review must return a clickable result link');
+  assert(reviewRecordDryRun?.ok === true && reviewRecordDryRun?.executed === false, 'remote-execute-step pose review: verified receipt should produce a safe record dry-run');
+  assert(reviewRecordDryRun?.result_links?.[0]?.url === 'burrete://audit', 'remote-execute-step pose review: verified receipt must return a clickable result link');
 
   const blocked = parseJson(
     runCli(
@@ -624,9 +630,10 @@ function checkTrajectoryManifestWriter(fixture) {
   assert(manifest.native_trajectory === 'trajectory.xtc', 'trajectory manifest: native trajectory provenance missing');
   assert(manifest.native_topology === 'md.tpr', 'trajectory manifest: native topology provenance missing');
   assert(manifest.native_topology_role === 'provenance', 'trajectory manifest: native topology must be provenance');
-  assert(manifest.visualization_status === 'reopenable_package', 'trajectory manifest: expected reopenable_package status');
-  assert(manifest.reopen_command?.includes('burrete:trajectory-review'), 'trajectory manifest: expected Burrete reopen command');
+  assert(manifest.visualization_status === 'request_ready', 'trajectory manifest: expected request_ready status');
+  assert(manifest.reopen_command === 'burrete.open_workspace', 'trajectory manifest: expected real Burrete reopen command');
   assert(manifest.display_qc?.models === 2 && manifest.display_qc?.atoms_per_model === 1, 'trajectory manifest: expected validated multi-model display QC');
+  assert(existsSync(path.join(fixture.mdDir, 'burrete_request.json')), 'trajectory manifest: expected generated Burrete request');
 
   const invalid = runCli([
     'md', 'trajectory-manifest', '--out', path.join(fixture.mdDir, 'invalid_manifest.json'),
@@ -642,17 +649,28 @@ function checkStrictPipelineInspection(root) {
   for (const name of ['gnina', 'smina', 'boltz', 'matcha', 'logs']) mkdirSync(path.join(resultsDir, name), { recursive: true });
   ensureFile(path.join(resultsDir, 'summary_wide.csv'), 'case,smina_status\nsmoke,ok\n');
   ensureFile(path.join(resultsDir, 'summary_wide_notes.md'), '# Summary\n');
-  writeJson(path.join(resultsDir, 'pose_review_status.json'), {
-    status: 'opened',
-    handoff_url: 'http://127.0.0.1:60001/?pose-review=smoke',
+  writeJson(path.join(resultsDir, 'burrete_request.json'), {
+    schema: 'lp-flow.burrete-request.v1', request_id: 'smoke:docking', kind: 'docking_pose_review',
+    expectations: { minimum_poses: 1, pose_navigation_required: false },
   });
-  writeJson(path.join(resultsDir, 'trajectory_review_status.json'), {
-    status: 'reviewed',
-    handoff_url: 'http://127.0.0.1:60002/?trajectory-review=smoke',
+  writeJson(path.join(resultsDir, 'pose_review_status.json'), {
+    schema: 'lp-flow.burrete-receipt.v1', request_id: 'smoke:docking', status: 'verified', workspaceSessionId: 'ws-docking',
+    url: 'http://127.0.0.1:60001/?pose-review=smoke', activeDocument: { path: 'poses.sdf', ready: true },
+    viewer: { agentAvailable: true, agentReady: true, viewerReady: true }, visualQa: { canvasNonblank: true, poseCount: 1 },
   });
   ensureFile(path.join(runDir, 'md_from_best_pose', 'outputs', 'display.pdb'), 'MODEL        1\nENDMDL\nEND\n');
   writeJson(path.join(runDir, 'md_from_best_pose', 'outputs', 'trajectory_manifest.json'), {
     display: 'md_from_best_pose/outputs/display.pdb',
+  });
+  writeJson(path.join(runDir, 'md_from_best_pose', 'outputs', 'burrete_request.json'), {
+    schema: 'lp-flow.burrete-request.v1', request_id: 'smoke:md', kind: 'md_trajectory_review',
+    expectations: { minimum_frames: 100, frame_navigation_required: true, loop_required: true },
+  });
+  writeJson(path.join(resultsDir, 'trajectory_review_status.json'), {
+    schema: 'lp-flow.burrete-receipt.v1', request_id: 'smoke:md', status: 'verified', workspaceSessionId: 'ws-md',
+    url: 'http://127.0.0.1:60002/?trajectory-review=smoke', activeDocument: { path: 'display.pdb', ready: true },
+    viewer: { agentAvailable: true, agentReady: true, viewerReady: true },
+    visualQa: { canvasNonblank: true, frameCount: 100, frameNavigationVerified: true, loopVerified: true },
   });
   const displayQc = path.join(runDir, 'md_from_best_pose', 'outputs', 'display_qc.json');
   writeJson(displayQc, { models: 100, required_models: 100 });
@@ -661,7 +679,7 @@ function checkStrictPipelineInspection(root) {
     runCli(['inspect-results', '--results-dir', resultsDir, '--strict'], 'strict pipeline inspection'),
     'strict pipeline inspection',
   );
-  assert(valid?.ok === true, 'strict pipeline inspection: opened Burrete reviews and 100 display frames must pass');
+  assert(valid?.ok === true, 'strict pipeline inspection: verified Burrete receipts and 100 display frames must pass');
   assert(valid?.result_links?.length === 2, 'strict pipeline inspection: docking and MD Burrete links must be returned as final deliverables');
 
   writeJson(displayQc, { models: 3, required_models: 100 });
@@ -673,11 +691,34 @@ function checkStrictPipelineInspection(root) {
   pass('strict inspection rejects missing Burrete evidence and sparse MD displays');
 }
 
+function checkBurreteRequestReceiptCli(root) {
+  const requestPath = path.join(root, 'burrete_contract', 'burrete_request.json');
+  const receiptPath = path.join(root, 'burrete_contract', 'burrete_receipt.json');
+  const recordedPath = path.join(root, 'burrete_contract', 'pose_review_status.json');
+  const prepared = parseJson(runCli([
+    'burrete', 'request', '--kind', 'docking_pose_review', '--run-id', 'smoke',
+    '--receptor', 'receptor.pdb', '--poses', 'poses.sdf', '--out', requestPath,
+  ], 'burrete request'), 'burrete request');
+  assert(prepared?.request?.recommended_tools?.[0] === 'open_burrete_docking_view', 'burrete request: expected real docking tool');
+  writeJson(receiptPath, {
+    request_id: 'smoke:docking_pose_review', status: 'verified', workspaceSessionId: 'ws-cli', url: 'burrete://cli',
+    activeDocument: { path: 'poses.sdf', ready: true }, viewer: { agentAvailable: true, agentReady: true, viewerReady: true },
+    visualQa: { canvasNonblank: true, poseCount: 1 },
+  });
+  const recorded = parseJson(runCli([
+    'burrete', 'receipt', '--request', requestPath, '--receipt', receiptPath, '--out', recordedPath,
+  ], 'burrete receipt'), 'burrete receipt');
+  assert(recorded?.verified === true && recorded?.receipt?.workspaceSessionId === 'ws-cli', 'burrete receipt: expected verified workspace receipt');
+  assert(existsSync(recordedPath), 'burrete receipt: expected recorded receipt file');
+  pass('Burrete request/receipt CLI enforces workspace readiness and visual-QA evidence');
+}
+
 function main() {
   assert(existsSync(entrypoint), `entrypoint missing: ${entrypoint}`);
   const tempRoot = mkdtempSync(path.join(tmpdir(), 'lp-flow-execution-smoke-'));
   try {
     const fixture = createFixture(tempRoot);
+    checkBurreteRequestReceiptCli(tempRoot);
     checkStatusAndDiscovery();
     checkPrepareRedockingCase(tempRoot);
     checkPdbLigandDoesNotCreateFalseReceptorWarning(tempRoot);

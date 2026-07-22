@@ -86,13 +86,16 @@ lig1,smina,ok,-8.1,,,smina/lig1_poses.sdf,logs/lig1_smina.log,reference_ligand
 lig1,gnina,failed,,,,,logs/lig1_gnina.log,reference_ligand
 ```
 
-Open the selected/top pose or pose collection in Burrete and record the result
-beside the docking package:
+Write `burrete_request.json`, open the selected/top poses with
+`open_burrete_docking_view`, and observe the workspace. Record the receipt with:
 
-```text
-docking package: receptor context + pose files + score table
-review output: Burrete link/status in report
+```bash
+lp-flow burrete receipt --request burrete_request.json \
+  --receipt burrete_receipt.json --out pose_review_status.json
 ```
+
+Review is complete when the receipt contains `workspaceSessionId`, ready
+document/viewer state, a URL, and visual-QA evidence.
 
 Docking, CNN, and Vina-style scores rank poses for review; they are not measured
 binding free energies.
@@ -108,5 +111,4 @@ binding free energies.
 
 ---
 
-Open the selected/top poses in Burrete, then use the reviewed pose for the next
-requested analysis.
+Open and verify the selected/top poses in Burrete.

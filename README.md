@@ -51,16 +51,15 @@ node scripts/lp-flow.mjs list-tools
 | Co-folding | Boltz-2 complex prediction, confidence ranking, and affinity triage |
 | Rescoring | Optional Matcha scoring when its runtime, checkpoints, and parser are configured |
 | Dynamics | GROMACS EM/NVT/NPT or explicitly requested production workflows, cleanup, and metrics |
-| Review | Burrete pose collections and trajectory handoff with recorded open/status evidence |
+| Review | Burrete pose and trajectory requests with verified workspace receipts |
 
 ## Burrete Integration
 
-Burrete is an external molecular workspace. LP-Flow prepares receptor/pose and
-trajectory display packages, requests the Burrete handoff, and records its link
-or exact unavailable status. A static PNG is a report thumbnail, not completed
-interactive visualization. If Burrete is unavailable, LP-Flow preserves the
-scientific package and records visualization separately from scientific method
-status.
+Burrete is an external molecular workspace. LP-Flow writes
+`burrete_request.json`, recommends the installed docking or trajectory tools,
+and accepts visualization success only with a verified receipt containing a
+workspace session, ready document/viewer state, URL, and visual-QA result. A
+static PNG is a report thumbnail, not completed interactive visualization.
 
 ## Documentation
 

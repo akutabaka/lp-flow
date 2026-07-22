@@ -8,6 +8,7 @@ const tests = [
   'scripts/check-static.mjs',
   'scripts/check-source-release.mjs',
   'tests/mcp/check_stdio_conformance.mjs',
+  'tests/integration/check_burrete_host_integration.mjs',
   'tests/contracts/check_public_contract.mjs',
   'tests/contracts/check_pipeline_skills_contract.mjs',
   'tests/golden-prompts/validate_golden_prompts.mjs',

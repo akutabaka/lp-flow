@@ -113,6 +113,15 @@ nvt,blocked,,grompp failed,logs/grompp_nvt.log
 visualization,unavailable,,Burrete target unavailable,logs/burrete_preflight.log
 ```
 
+Write `burrete_request.json`, run
+`validate_trajectory_review_artifact`, open with `burrete.open_workspace`, and
+observe the workspace. Record the verified receipt with:
+
+```bash
+lp-flow burrete receipt --request burrete_request.json \
+  --receipt burrete_receipt.json --out trajectory_review_status.json
+```
+
 ## Errors worth recognizing
 
 | You see | It means / do this |
@@ -126,5 +135,4 @@ visualization,unavailable,,Burrete target unavailable,logs/burrete_preflight.log
 
 ---
 
-Open the no-water multi-frame display PDB in Burrete and keep native
-trajectory/topology files beside it for interpretation.
+Open and verify the no-water multi-frame display PDB in Burrete.

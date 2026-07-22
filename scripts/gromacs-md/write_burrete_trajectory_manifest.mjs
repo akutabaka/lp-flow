@@ -28,7 +28,7 @@ Options:
   --trajectory <file>             Native trajectory/provenance, e.g. .xtc
   --structure <file>              Native stage structure/provenance, e.g. .gro/.pdb
   --preview-metadata <file>       Compact display metadata, e.g. preview_nowater.json
-  --visualization-status <status> opened|reopenable_package|unavailable|blocked
+  --visualization-status <status> request_ready|verified|unavailable|blocked
   --codex-browser-status <status> opened|not_verified|unavailable
   --codex-observe-ready <bool>
   --reopen-command <command>      Command or tool target for reopening the display package
@@ -157,13 +157,13 @@ async function main() {
   const baseDir = path.dirname(out);
   const visualizationStatus = normalizeStatus(
     args.visualizationStatus,
-    'reopenable_package',
-    ['opened', 'reopenable_package', 'unavailable', 'blocked'],
+    'request_ready',
+    ['request_ready', 'verified', 'unavailable', 'blocked'],
     'visualization-status',
   );
   const codexBrowserStatus = normalizeStatus(
     args.codexBrowserStatus,
-    visualizationStatus === 'opened' ? 'opened' : 'not_verified',
+    visualizationStatus === 'verified' ? 'opened' : 'not_verified',
     ['opened', 'not_verified', 'unavailable'],
     'codex-browser-status',
   );
@@ -202,8 +202,8 @@ async function main() {
   if (args.burreteUrl) manifest.burrete_url = String(args.burreteUrl);
   if (args.urlScope) manifest.url_scope = String(args.urlScope);
 
-  if (visualizationStatus === 'reopenable_package' && !manifest.reopen_command) {
-    manifest.reopen_command = `burrete:trajectory-review ${manifest.display}`;
+  if (visualizationStatus === 'request_ready' && !manifest.reopen_command) {
+    manifest.reopen_command = 'burrete.open_workspace';
   }
 
   await fs.promises.mkdir(path.dirname(out), { recursive: true });

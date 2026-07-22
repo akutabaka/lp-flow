@@ -32,7 +32,8 @@ manifest and dry-run plan before any remote execution.
 
 ## 4. Visualization
 
-Burrete is an external Codex plugin. LP-Flow prepares the handoff package and
-reports an opened link or an unavailable status. Without Burrete, a package is
-still retained, but visualization has not been opened. Scientific package
-generation and visualization status are reported separately.
+Burrete is an external Codex plugin. LP-Flow writes `burrete_request.json` for
+docking and MD packages. Record the result with `lp-flow burrete receipt`;
+success requires `workspaceSessionId`, ready document/viewer state, a URL, and
+visual-QA evidence. Scientific package generation and visualization status are
+reported separately.

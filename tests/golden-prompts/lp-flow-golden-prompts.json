@@ -9,9 +9,10 @@
         "gnina-smina-docking",
         "boltz",
         "matcha-scoring",
-        "burrete:molecule-collection",
+        "open_burrete_docking_view",
         "gromacs-md",
-        "burrete:trajectory-review"
+        "validate_trajectory_review_artifact",
+        "burrete.open_workspace"
       ],
       "required_artifacts": [
         "run_manifest.json",
@@ -42,9 +43,10 @@
         "gnina-smina-docking",
         "boltz",
         "matcha-scoring",
-        "burrete:molecule-collection",
+        "open_burrete_docking_view",
         "gromacs-md",
-        "burrete:trajectory-review"
+        "validate_trajectory_review_artifact",
+        "burrete.open_workspace"
       ],
       "required_artifacts": [
         "run_manifest.json",
@@ -95,8 +97,9 @@
       "id": "existing_outputs_two_visualizations",
       "prompt": "Give me clickable visualization links for the docking pose collection and the completed MD trajectory.",
       "expected_trace": [
-        "burrete:molecule-collection",
-        "burrete:trajectory-review"
+        "open_burrete_docking_view",
+        "validate_trajectory_review_artifact",
+        "burrete.open_workspace"
       ],
       "required_artifacts": [
         "pose_review_status.json",

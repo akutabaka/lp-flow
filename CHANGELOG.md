@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0-rc.6] - 2026-07-22
+
+- Added typed `burrete_request.json` generation for docking and MD review.
+- Added CLI/MCP receipt validation with workspace, readiness, URL, and visual-QA evidence.
+- Replaced declarative viewer targets with installed Burrete tool recommendations.
+- Added an installed-Burrete host integration test and compatibility aliases for rc.5 step names.
+
 All notable changes to LP-Flow are documented here.
 
 ## [Unreleased]

@@ -41,7 +41,7 @@ user input
   -> local run package
   -> private profile and approved execution
   -> scientific artifacts and manifests
-  -> Burrete handoff or recorded unavailable status
+  -> typed Burrete request and verified receipt
 ```
 
 Input validation and run-package generation happen locally. Private profiles,
@@ -50,11 +50,11 @@ the user environment. Scientific artifacts stay under the configured run root.
 
 ## Visualization Handoff
 
-LP-Flow prepares docking-pose and trajectory display packages for Burrete.
-Burrete is an external optional integration and may not be publicly available.
-When it cannot open a package, LP-Flow retains the scientific artifacts and
-returns `visualization_status: unavailable`; that status is distinct from a
-scientific method failure.
+LP-Flow writes `burrete_request.json` beside each docking or MD review package.
+Docking recommends `open_burrete_docking_view`; MD recommends
+`validate_trajectory_review_artifact` and `burrete.open_workspace`. The receipt
+gate accepts success only with `workspaceSessionId`, readiness, URL, and
+visual-QA evidence. Visualization failure remains distinct from method status.
 
 ## Source Release Validation
 
