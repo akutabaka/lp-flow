@@ -1,6 +1,6 @@
 {
   "name": "lp-flow",
-  "version": "0.1.0-rc.7",
+  "version": "0.1.0-rc.8",
   "private": true,
   "description": "Codex MCP/CLI plugin for reproducible docking and molecular-dynamics workflows.",
   "type": "module",
@@ -19,7 +19,7 @@
     "test:burrete-host": "node tests/integration/check_burrete_host_integration.mjs",
     "test:public": "node tests/contracts/check_public_contract.mjs",
     "test:skills": "node tests/contracts/check_pipeline_skills_contract.mjs",
-    "test:golden": "node tests/golden-prompts/validate_golden_prompts.mjs",
+    "test:golden": "node tests/golden-prompts/validate_golden_prompts.mjs && node tests/golden-prompts/replay_golden_prompts.mjs",
     "test:smoke": "node tests/execution/check_pipeline_execution_smoke.mjs",
     "test:package": "node tests/contracts/check_source_package.mjs"
   }

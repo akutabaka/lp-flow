@@ -90,6 +90,7 @@ if (existsSync(archive)) {
         ['tests/mcp/check_stdio_conformance.mjs'],
         ['tests/contracts/check_public_contract.mjs'],
         ['tests/golden-prompts/validate_golden_prompts.mjs'],
+        ['tests/golden-prompts/replay_golden_prompts.mjs'],
         ['tests/execution/check_pipeline_execution_smoke.mjs'],
       ];
       for (const args of commands) {

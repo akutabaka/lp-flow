@@ -13,6 +13,7 @@ const tests = [
   'tests/contracts/check_public_contract.mjs',
   'tests/contracts/check_pipeline_skills_contract.mjs',
   'tests/golden-prompts/validate_golden_prompts.mjs',
+  'tests/golden-prompts/replay_golden_prompts.mjs',
   'tests/execution/check_pipeline_execution_smoke.mjs',
   'tests/contracts/check_source_package.mjs',
 ];

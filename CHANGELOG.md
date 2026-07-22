@@ -4,8 +4,14 @@ All notable changes to LP-Flow are documented here.
 
 ## [Unreleased]
 
+## [0.1.0-rc.8] - 2026-07-22
+
 - Changed tag automation to verify and attest release assets without publishing
   GitHub Releases under the `github-actions` identity.
+- Added Unicode/mojibake validation for multilingual golden prompts.
+- Added deterministic golden-route replay against shipped skills and Burrete
+  handoff targets.
+- Verified clean Git marketplace installation and installed-package tests.
 
 ## [0.1.0-rc.7] - 2026-07-22
 
