@@ -4,6 +4,9 @@ All notable changes to LP-Flow are documented here.
 
 ## [Unreleased]
 
+- Changed tag automation to verify and attest release assets without publishing
+  GitHub Releases under the `github-actions` identity.
+
 ## [0.1.0-rc.7] - 2026-07-22
 
 - Switched `.mcp.json` to the documented direct server-map format.
