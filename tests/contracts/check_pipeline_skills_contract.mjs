@@ -446,7 +446,7 @@ function checkCliPipelineSurface() {
   assertIncludes(runHelp, 'Server/profile/tool paths must come from config/profile/flags/env, never hidden defaults.', 'run help');
 
   const mdHelp = runCli(['md', '--help'], 'md help');
-  assertIncludes(mdHelp, 'trajectory-serve is a legacy/local native viewer for real structure + trajectory files', 'md help');
+  assertNotIncludes(mdHelp, 'trajectory-serve', 'md help must not expose the removed local viewer');
   assertIncludes(mdHelp, 'bounded no-water multi-frame PDB display artifact', 'md help');
   assertIncludes(mdHelp, 'Resource allocation follows the configured scheduler profile', 'md help');
 
@@ -468,7 +468,7 @@ function checkCliPipelineSurface() {
   assert(!toolNames.some(name => name.includes('story') || name.includes('molstar')), `public list-tools: old visualization/story tools leaked: ${toolNames.join(', ')}`);
 
   const internalHelp = runCli(['list-tools', '--include-internal'], 'internal list-tools');
-  assertIncludes(internalHelp, 'Internal/compatibility only; ordinary molecular visualization goes through Burrete.', 'internal compatibility visualization wording');
+  assertNotIncludes(internalHelp, 'MolViewStories', 'internal help must not expose the removed viewer');
   pass('CLI discovery exposes docking, MD, and Burrete-first visualization contracts without running workflows');
 }
 

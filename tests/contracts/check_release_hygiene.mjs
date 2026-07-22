@@ -74,10 +74,11 @@ if (gitFiles.status === 0) {
 for (const required of ['README.md', 'CONTRIBUTING.md', 'SECURITY.md', 'THIRD_PARTY_NOTICES.md', 'CHANGELOG.md', '.gitattributes', '.github/workflows/ci.yml']) {
   assert(existsSync(path.join(root, ...required.split('/'))), `missing public-release file: ${required}`);
 }
-assert(existsSync(path.join(root, 'third_party', 'mol-view-stories-LICENSE.txt')), 'bundled Mol View Stories assets require an MIT notice');
 const notices = read('THIRD_PARTY_NOTICES.md');
-assert(notices.includes('Mol View Stories 5.8.0'), 'third-party notices must list bundled Mol View Stories assets');
-assert(notices.includes('mol-view-stories-LICENSE.txt'), 'third-party notices must point to the bundled Mol View Stories notice');
+assert(!notices.includes('Mol View Stories'), 'third-party notices must not list removed viewer assets');
+assert(!existsSync(path.join(root, 'assets', 'mvs-stories')), 'legacy viewer assets must not be bundled');
+assert(existsSync(path.join(root, 'assets', 'screenshots', 'lp-flow-demo.png')), 'README hero screenshot is missing');
+assert(existsSync(path.join(root, 'assets', 'diagrams', 'lp-flow-architecture.svg')), 'architecture diagram is missing');
 
 if (failures.length) {
   console.error('Release hygiene check FAILED');

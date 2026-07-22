@@ -17,7 +17,6 @@ const repoRoot = path.resolve(here, '..', '..');
 const entrypoint = path.join(repoRoot, 'scripts', 'lp-flow.mjs');
 const node = process.execPath;
 const { classifySlurmEligibilityOutput, classifySlurmQueueOutput } = await import(pathToFileURL(entrypoint).href);
-const allowViewerServer = process.argv.includes('--allow-viewer-server');
 const keepTemp = process.argv.includes('--keep-temp');
 const failures = [];
 const passes = [];
@@ -583,51 +582,14 @@ function checkMdSmokeTemplate(fixture) {
   pass('MD smoke-template writes a charge-gated package contract without claiming MD completion');
 }
 
-function checkTrajectoryHandoffPolicy(fixture) {
+function checkTrajectoryHandoffPolicy() {
   const help = runCli(['md', '--help'], 'md help').text;
-  assert(help.includes('trajectory-serve is a legacy/local native viewer for real structure + trajectory files'), 'md help: expected legacy/native trajectory policy');
+  assert(!help.includes('trajectory-serve'), 'md help: removed local viewer must stay absent');
   assert(help.includes('bounded no-water multi-frame PDB display artifact'), 'md help: expected Burrete display artifact policy');
 
-  const missing = runCli([
-    'md',
-    'trajectory-serve',
-    '--structure',
-    path.join(fixture.mdDir, 'reference.gro'),
-    '--trajectory',
-    path.join(fixture.mdDir, 'missing.xtc'),
-  ], 'md trajectory missing input guard', { expectStatus: 1 });
-  assert(missing.text.includes('trajectory does not exist'), 'md trajectory missing input guard: expected missing trajectory error');
-
-  if (!allowViewerServer) {
-    pass('trajectory visualization execution guard validated without starting a local server');
-    return;
-  }
-
-  const served = parseJson(
-    runCli([
-      'md',
-      'trajectory-serve',
-      '--structure',
-      path.join(fixture.mdDir, 'reference.gro'),
-      '--trajectory',
-      path.join(fixture.mdDir, 'trajectory.xtc'),
-      '--port',
-      '0',
-      '--title',
-      'LP-Flow execution smoke trajectory',
-    ], 'md trajectory local server'),
-    'md trajectory local server',
-  );
-  assert(served?.kind === 'lp-flow-md-trajectory-viewer', 'md trajectory local server: expected viewer kind');
-  assert(served?.served === true && served?.viewerUrl, 'md trajectory local server: expected served viewerUrl');
-  if (served?.pid) {
-    try {
-      process.kill(served.pid);
-    } catch {
-      // Best-effort cleanup only; the process may already have exited.
-    }
-  }
-  pass('trajectory viewer starts locally when --allow-viewer-server is supplied');
+  const removed = runCli(['md', 'trajectory-serve'], 'removed MD trajectory viewer', { expectStatus: 1 });
+  assert(removed.text.includes('Unknown md action: trajectory-serve'), 'removed MD trajectory viewer: expected unknown action');
+  pass('MD trajectory review uses the Burrete display artifact contract without a bundled local viewer');
 }
 
 function checkTrajectoryManifestWriter(fixture) {
@@ -724,7 +686,7 @@ function main() {
     checkMdDryRunExecution(fixture);
     checkMdSmokeTemplate(fixture);
     checkTrajectoryManifestWriter(fixture);
-    checkTrajectoryHandoffPolicy(fixture);
+    checkTrajectoryHandoffPolicy();
     checkStrictPipelineInspection(tempRoot);
 
     if (failures.length) {

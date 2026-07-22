@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -11,7 +10,6 @@ const repoRoot = path.resolve(here, '..', '..');
 const entrypoint = path.join(repoRoot, 'scripts', 'lp-flow.mjs');
 const node = process.execPath;
 
-const GUARD_MESSAGE = 'This mode is planned or internal and is not part of the supported public workflow.';
 const PUBLIC_TOOLS = [
   'lp_flow_md_analyze_tpr',
   'lp_flow_md_connect_check',
@@ -40,24 +38,12 @@ const INTERNAL_TOOLS = [
   'lp_flow_md_result',
   'lp_flow_md_status',
   'lp_flow_md_submit',
-  'lp_flow_md_trajectory_serve',
   'lp_flow_plugin_status',
   'lp_flow_prepare_redocking_case',
   'lp_flow_run_docking',
   'lp_flow_resolve_profile',
   'lp_flow_find_case_folder',
   'lp_flow_validate_case_folder',
-  'lp_flow_make_molstar_viewer_command',
-  'lp_flow_make_docking_story_command',
-  'lp_flow_make_docking_story',
-  'lp_flow_make_cellpack_story_command',
-  'lp_flow_make_cellpack_story',
-  'lp_flow_story_serve',
-  'lp_flow_story_validate',
-  'lp_flow_story_serve_hub',
-  'lp_flow_story_render_package',
-  'lp_flow_visualize_docking',
-  'lp_flow_visualize_story',
   'lp_flow_safe_remote_cleanup_check',
   'lp_flow_build_run_plan',
   'lp_flow_write_run_package',
@@ -179,9 +165,9 @@ function checkPluginMcpConfig() {
   const mcpConfigPath = path.join(repoRoot, '.mcp.json');
   assert(existsSync(mcpConfigPath), `.mcp.json not found: ${mcpConfigPath}`);
   const config = JSON.parse(readFileSync(mcpConfigPath, 'utf8'));
-  assert(!Object.hasOwn(config, 'mcpServers'), '.mcp.json must use a direct server map, not a nested mcpServers wrapper');
-  assert(!Object.hasOwn(config, 'mcp_servers'), '.mcp.json must use the LP-Flow direct server map');
-  const servers = config;
+  assert(Object.hasOwn(config, 'mcpServers'), '.mcp.json must use the standard mcpServers wrapper');
+  assert(!Object.hasOwn(config, 'mcp_servers'), '.mcp.json must not use the legacy mcp_servers key');
+  const servers = config.mcpServers;
   assert(servers.lp_flow_mcp, '.mcp.json must expose lp_flow_mcp');
   assert(!servers['lp-flow'], '.mcp.json must not use a hyphenated MCP server id');
   assert(servers.lp_flow_mcp.cwd === '.', '.mcp.json lp_flow_mcp must set cwd "."');
@@ -190,22 +176,14 @@ function checkPluginMcpConfig() {
   pass('.mcp.json uses a portable node entrypoint, Codex-visible server id, and plugin-root cwd');
 }
 
-function checkPluginManifestAndProvenance() {
+function checkPluginManifestAndAssets() {
   const manifest = JSON.parse(readFileSync(path.join(repoRoot, '.codex-plugin', 'plugin.json'), 'utf8'));
   assert(!Object.hasOwn(manifest.interface || {}, 'requirements'), 'plugin manifest: unsupported interface.requirements must be omitted');
   assert(!Object.hasOwn(manifest.interface || {}, 'thirdPartyAssetNotes'), 'plugin manifest: unsupported interface.thirdPartyAssetNotes must be omitted');
-  const provenancePath = path.join(repoRoot, 'docs', 'artifact-provenance.md');
-  const provenance = readFileSync(provenancePath, 'utf8');
-  const artifacts = [
-    ['assets/mvs-stories/5.8.0/mvs-stories.js', '8C6E04E9D1F2A405CF2AA5911E02EC4F12E96712953F10D917EC89E75832F7ED'],
-    ['assets/mvs-stories/5.8.0/mvs-stories.css', 'FAE238EED3E0B0F166C21BA852809EF9DF4CD637954982F98516BEFFC1FDA396'],
-  ];
-  for (const [relative, expected] of artifacts) {
-    const actual = createHash('sha256').update(readFileSync(path.join(repoRoot, ...relative.split('/')))).digest('hex').toUpperCase();
-    assert(actual === expected, `artifact provenance: SHA-256 mismatch for ${relative}`);
-    assertIncludes(provenance, expected, `artifact provenance ${relative}`);
-  }
-  pass('plugin manifest uses accepted fields and bundled compatibility-asset checksums match provenance');
+  assert(existsSync(path.join(repoRoot, 'assets', 'screenshots', 'lp-flow-demo.png')), 'README hero screenshot must exist');
+  assert(existsSync(path.join(repoRoot, 'assets', 'diagrams', 'lp-flow-architecture.svg')), 'architecture diagram must exist');
+  assert(!existsSync(path.join(repoRoot, 'assets', 'mvs-stories')), 'legacy Mol View Stories assets must not be bundled');
+  pass('plugin manifest uses accepted fields and public assets are present without the legacy viewer bundle');
 }
 
 function enumValues(tool, propertyName) {
@@ -275,13 +253,12 @@ function checkAdvancedInternalHelp() {
 
   const internal = requireCli(['--help', '--internal'], 'internal help').text;
   assertIncludes(internal, 'Internal/compatibility', 'internal help');
-  for (const command of ['make-viewer-command', 'build-run-plan', 'remote-command-plan', 'remote-execute-step']) {
+  for (const command of ['build-run-plan', 'remote-command-plan', 'remote-execute-step']) {
     assertIncludes(internal, command, 'internal help');
   }
-  assertIncludes(internal, 'story serve-hub', 'internal help');
-  assertIncludes(internal, 'story render-package', 'internal help');
-  assertIncludes(internal, 'visualize story', 'internal help');
-  pass('advanced/internal help exposes expected advanced and compatibility surfaces');
+  assertNotIncludes(internal, 'story serve', 'internal help');
+  assertNotIncludes(internal, 'visualize story', 'internal help');
+  pass('advanced/internal help exposes execution and maintenance surfaces without legacy viewers');
 }
 
 function checkToolDiscovery() {
@@ -356,35 +333,13 @@ function checkPublicSchemas(mcpPublic) {
   pass('public MCP tools/call enforces the same visibility boundary as discovery');
 }
 
-function checkGuardsAndAliases() {
-  const plannedCalls = [
-    {
-      label: 'visualize structure',
-      args: ['visualize', 'structure', '--input', path.join(repoRoot, 'missing-ordinary.pdb'), '--viewer', 'molstar'],
-    },
-    {
-      label: 'visualize docking --viewer molstar',
-      args: ['visualize', 'docking', '--input', path.join(repoRoot, 'missing-results'), '--viewer', 'molstar', '--out-dir', path.join(repoRoot, 'missing-story')],
-    },
-    {
-      label: 'visualize story --story-type generic',
-      args: ['visualize', 'story', '--input', path.join(repoRoot, 'missing-model.bcif'), '--viewer', 'molstory', '--story-type', 'generic', '--out-dir', path.join(repoRoot, 'missing-story')],
-    },
-  ];
-  for (const call of plannedCalls) {
-    const result = runCli(call.args);
-    assert(result.status !== 0, `${call.label}: expected non-zero exit`);
-    assertIncludes(result.text, GUARD_MESSAGE, call.label);
+function checkRemovedViewerCommands() {
+  for (const command of ['visualize', 'story']) {
+    const result = runCli([command]);
+    assert(result.status !== 0, `${command}: expected removed command to fail`);
+    assertIncludes(result.text, `Unknown command: ${command}`, `${command} removal`);
   }
-
-  const openAlias = runCli(['visualize', 'docking', '--input', path.join(repoRoot, 'missing-results'), '--viewer', 'molstar', '--out-dir', path.join(repoRoot, 'missing-story'), '--open', 'true']);
-  assert(openAlias.status !== 0, '--open alias guard call: expected non-zero exit');
-  assertIncludes(openAlias.text, '--open is deprecated/ambiguous', '--open alias warning');
-
-  const openCodexAlias = runCli(['visualize', 'story', '--input', path.join(repoRoot, 'missing-model.bcif'), '--viewer', 'molstory', '--story-type', 'generic', '--out-dir', path.join(repoRoot, 'missing-story'), '--open-codex', 'true']);
-  assert(openCodexAlias.status !== 0, '--open-codex alias guard call: expected non-zero exit');
-  assertIncludes(openCodexAlias.text, '--open-codex is deprecated', '--open-codex alias warning');
-  pass('planned modes are guarded and deprecated aliases warn');
+  pass('legacy viewer commands are absent from the CLI');
 }
 
 function checkTreeHygiene() {
@@ -399,7 +354,8 @@ function checkTreeHygiene() {
       const fullPath = path.join(current, entry.name);
       const relative = path.relative(repoRoot, fullPath);
       if (entry.isDirectory()) {
-        if (forbiddenDirectoryNames.has(entry.name) || /^tmp/i.test(entry.name) || /^viewer/i.test(entry.name)) {
+        const curatedScreenshotDir = relative === path.join('assets', 'screenshots');
+        if ((forbiddenDirectoryNames.has(entry.name) && !curatedScreenshotDir) || /^tmp/i.test(entry.name) || /^viewer/i.test(entry.name)) {
           violations.push(`${relative}${path.sep}`);
           continue;
         }
@@ -539,12 +495,12 @@ function checkPersistentSshControlMaster() {
 function main() {
   assert(existsSync(entrypoint), `entrypoint not found: ${entrypoint}`);
   checkPluginMcpConfig();
-  checkPluginManifestAndProvenance();
+  checkPluginManifestAndAssets();
   checkPublicHelp();
   checkAdvancedInternalHelp();
   const { mcpPublic } = checkToolDiscovery();
   checkPublicSchemas(mcpPublic);
-  checkGuardsAndAliases();
+  checkRemovedViewerCommands();
   checkPersistentSshControlMaster();
   checkTreeHygiene();
 

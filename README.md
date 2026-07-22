@@ -7,7 +7,7 @@ rescoring, molecular dynamics, and interactive result review.**
 [![Release](https://img.shields.io/github/v/release/akutabaka/lp-flow?include_prereleases&label=release)](https://github.com/akutabaka/lp-flow/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0f766e.svg)](LICENSE)
 
-![LP-Flow architecture](assets/diagrams/lp-flow-architecture.png)
+![LP-Flow running a docking-to-MD workflow in Codex with Burrete review](assets/screenshots/lp-flow-demo.png)
 
 ## What Is LP-Flow?
 
@@ -21,16 +21,14 @@ The plugin does not bundle scientific engines, credentials, model weights,
 private profiles, or user data. Those remain in the user's execution
 environment and task workspace.
 
-## Workflow
+## Architecture
 
-![LP-Flow workflow](assets/diagrams/from-molecule-to-review.png)
+![LP-Flow architecture](assets/diagrams/lp-flow-architecture.svg)
 
-1. Define a receptor, ligand, and binding site.
-2. Validate inputs and prepare an explicit run package.
-3. Run configured docking, Boltz, or optional Matcha methods.
-4. Preserve result status and select a reviewable pose.
-5. Review poses and trajectories in Burrete; continue the selected complex to
-   GROMACS MD when requested.
+Docking, Boltz, and Matcha are distinct calculation lanes rather than a fixed
+linear chain. LP-Flow validates each requested lane, runs it through the user's
+configured environment, records method-specific status and artifacts, and
+passes selected poses or MD display trajectories to Burrete.
 
 ## Quick Start
 

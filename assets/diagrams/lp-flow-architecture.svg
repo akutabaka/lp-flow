@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc">
+  <title id="title">LP-Flow architecture</title>
+  <desc id="desc">A Codex request is routed through focused LP-Flow skills and its MCP and CLI layer to a user-configured scientific environment. Results are recorded as artifacts and handed to Burrete for docking-pose and molecular-dynamics review.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#475569"/>
+    </marker>
+    <style>
+      .title { font: 700 30px Arial, sans-serif; fill: #102a2a; }
+      .subtitle { font: 400 15px Arial, sans-serif; fill: #52606d; }
+      .heading { font: 700 17px Arial, sans-serif; fill: #102a2a; }
+      .label { font: 600 14px Arial, sans-serif; fill: #243b53; }
+      .small { font: 400 13px Arial, sans-serif; fill: #52606d; }
+      .arrow { stroke: #475569; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1200" height="620" fill="#ffffff"/>
+  <text x="54" y="58" class="title">LP-Flow architecture</text>
+  <text x="54" y="84" class="subtitle">Portable orchestration in Codex; scientific engines, credentials, and data remain in the user's environment.</text>
+
+  <rect x="54" y="135" width="180" height="116" rx="8" fill="#eef6f4" stroke="#14866d" stroke-width="2"/>
+  <text x="144" y="171" class="heading" text-anchor="middle">Codex request</text>
+  <text x="144" y="199" class="small" text-anchor="middle">inputs + requested stages</text>
+  <text x="144" y="222" class="small" text-anchor="middle">results + review links</text>
+
+  <rect x="300" y="112" width="360" height="316" rx="8" fill="#f7fafc" stroke="#334e68" stroke-width="2"/>
+  <text x="480" y="145" class="heading" text-anchor="middle">LP-Flow plugin</text>
+
+  <rect x="326" y="166" width="144" height="58" rx="6" fill="#dff3ec" stroke="#14866d"/>
+  <text x="398" y="192" class="label" text-anchor="middle">Docking</text>
+  <text x="398" y="211" class="small" text-anchor="middle">GNINA / SMINA</text>
+  <rect x="490" y="166" width="144" height="58" rx="6" fill="#e8eef9" stroke="#4667a8"/>
+  <text x="562" y="192" class="label" text-anchor="middle">Boltz</text>
+  <text x="562" y="211" class="small" text-anchor="middle">co-folding / triage</text>
+  <rect x="326" y="240" width="144" height="58" rx="6" fill="#fff2d9" stroke="#b7791f"/>
+  <text x="398" y="266" class="label" text-anchor="middle">Matcha</text>
+  <text x="398" y="285" class="small" text-anchor="middle">optional rescoring</text>
+  <rect x="490" y="240" width="144" height="58" rx="6" fill="#f4e8f5" stroke="#8c4f91"/>
+  <text x="562" y="266" class="label" text-anchor="middle">GROMACS MD</text>
+  <text x="562" y="285" class="small" text-anchor="middle">setup / run / analysis</text>
+
+  <rect x="326" y="326" width="308" height="72" rx="6" fill="#ffffff" stroke="#829ab1"/>
+  <text x="480" y="352" class="label" text-anchor="middle">MCP + CLI orchestration</text>
+  <text x="480" y="375" class="small" text-anchor="middle">validation | execution plans | status | manifests</text>
+
+  <rect x="730" y="112" width="416" height="190" rx="8" fill="#fffaf0" stroke="#b7791f" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="938" y="145" class="heading" text-anchor="middle">User-configured execution environment</text>
+  <text x="938" y="174" class="small" text-anchor="middle">local machine or server profile</text>
+  <rect x="758" y="194" width="164" height="72" rx="6" fill="#ffffff" stroke="#c59a48"/>
+  <text x="840" y="220" class="label" text-anchor="middle">Scientific engines</text>
+  <text x="840" y="243" class="small" text-anchor="middle">binaries + models</text>
+  <rect x="942" y="194" width="176" height="72" rx="6" fill="#ffffff" stroke="#c59a48"/>
+  <text x="1030" y="220" class="label" text-anchor="middle">Private configuration</text>
+  <text x="1030" y="243" class="small" text-anchor="middle">paths + credentials</text>
+
+  <rect x="730" y="338" width="416" height="90" rx="8" fill="#f7fafc" stroke="#627d98" stroke-width="2"/>
+  <text x="938" y="369" class="heading" text-anchor="middle">Scientific artifacts</text>
+  <text x="938" y="395" class="small" text-anchor="middle">scores | poses | trajectories | metrics | logs | provenance</text>
+
+  <rect x="300" y="492" width="846" height="82" rx="8" fill="#eef6f4" stroke="#14866d" stroke-width="2"/>
+  <text x="723" y="523" class="heading" text-anchor="middle">Burrete review</text>
+  <text x="516" y="550" class="label" text-anchor="middle">Docking pose collection</text>
+  <text x="930" y="550" class="label" text-anchor="middle">Bounded no-water MD trajectory display</text>
+
+  <path d="M234 193 H290" class="arrow"/>
+  <path d="M660 362 H704 V207 H722" class="arrow"/>
+  <path d="M938 302 V330" class="arrow"/>
+  <path d="M938 428 V481" class="arrow"/>
+  <path d="M480 428 V481" class="arrow"/>
+</svg>
