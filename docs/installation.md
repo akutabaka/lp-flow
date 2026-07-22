@@ -3,6 +3,20 @@
 LP-Flow is an MIT-licensed Codex plugin. It requires Node.js 20 or newer,
 an installed Codex or ChatGPT desktop host, and a marketplace entry.
 
+## Git Marketplace
+
+Register the public repository as a marketplace and install LP-Flow from the
+Plugins Directory:
+
+```bash
+codex plugin marketplace add akutabaka/lp-flow --ref main
+codex plugin marketplace list
+```
+
+Restart the ChatGPT desktop app, open **Plugins**, select **LP-Flow**, install
+the plugin, and start a new chat. Verify that four skills and the `lp_flow_mcp`
+server are visible, then call `lp_flow_plugin_status`.
+
 ## Local Marketplace
 
 Create a marketplace root with this layout:
@@ -28,13 +42,6 @@ Restart the ChatGPT desktop app. In Work mode or Codex, open **Plugins**, select
 **LP-Flow Local**, install **LP-Flow**, and start a new chat. Verify the
 installation with `lp_flow_plugin_status` and a non-executing
 `lp_flow_run_docking` package request.
-
-## Shared Git Marketplace
-
-This repository is the plugin source, not a published marketplace repository.
-Until LP-Flow publishes a separate marketplace with a real URL and a tested
-installation command, use the local marketplace procedure above. Do not assume
-that `codex plugin marketplace add <owner>/lp-flow` is supported.
 
 LP-Flow does not bundle scientific engines, user credentials, compute profiles,
 or Burrete. Configure those components in the user's environment.

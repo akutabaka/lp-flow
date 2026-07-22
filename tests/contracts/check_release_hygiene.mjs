@@ -71,9 +71,13 @@ if (gitFiles.status === 0) {
   assert(!tracked.some(file => /(^|\/)(?:runtime|dist)\//.test(file) || /(^|\/)node\.exe$/i.test(file) || /\.(?:zip|tar|tar\.gz)$/i.test(file)), 'tracked source must not contain runtimes, dist files, node.exe, or release archives');
 }
 
-for (const required of ['README.md', 'CONTRIBUTING.md', 'SECURITY.md', 'THIRD_PARTY_NOTICES.md', 'CHANGELOG.md', '.gitattributes', '.github/workflows/ci.yml']) {
+for (const required of ['README.md', 'CONTRIBUTING.md', 'SECURITY.md', 'THIRD_PARTY_NOTICES.md', 'CHANGELOG.md', '.gitattributes', '.agents/plugins/marketplace.json', '.github/workflows/ci.yml', '.github/workflows/codeql.yml', '.github/workflows/release.yml', '.github/dependabot.yml']) {
   assert(existsSync(path.join(root, ...required.split('/'))), `missing public-release file: ${required}`);
 }
+const marketplace = JSON.parse(read('.agents/plugins/marketplace.json'));
+const marketplaceEntry = (marketplace.plugins || []).find(plugin => plugin.name === 'lp-flow');
+assert(marketplaceEntry?.source?.source === 'url', 'public marketplace must use a root-level Git URL source');
+assert(marketplaceEntry?.source?.url === 'https://github.com/akutabaka/lp-flow.git', 'public marketplace URL must match the repository');
 const notices = read('THIRD_PARTY_NOTICES.md');
 assert(!notices.includes('Mol View Stories'), 'third-party notices must not list removed viewer assets');
 assert(!existsSync(path.join(root, 'assets', 'mvs-stories')), 'legacy viewer assets must not be bundled');

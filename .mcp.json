@@ -1,12 +1,10 @@
 {
-  "mcpServers": {
-    "lp_flow_mcp": {
-      "cwd": ".",
-      "command": "node",
-      "args": [
-        "./scripts/lp-flow.mjs",
-        "mcp"
-      ]
-    }
+  "lp_flow_mcp": {
+    "cwd": ".",
+    "command": "node",
+    "args": [
+      "./scripts/lp-flow.mjs",
+      "mcp"
+    ]
   }
 }

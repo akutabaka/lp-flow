@@ -1,15 +1,24 @@
 # Changelog
 
+All notable changes to LP-Flow are documented here.
+
+## [Unreleased]
+
+## [0.1.0-rc.7] - 2026-07-22
+
+- Switched `.mcp.json` to the documented direct server-map format.
+- Added a Git-backed marketplace entry and reproducible public install command.
+- Added MCP subprocess cancellation and explicit Burrete host PASS/SKIPPED status.
+- Added a dated installed-Burrete validation record and external-tool matrix.
+- Pinned CI actions to immutable commit SHAs and added CodeQL, Dependabot, and
+  release-asset provenance attestation.
+
 ## [0.1.0-rc.6] - 2026-07-22
 
 - Added typed `burrete_request.json` generation for docking and MD review.
 - Added CLI/MCP receipt validation with workspace, readiness, URL, and visual-QA evidence.
 - Replaced declarative viewer targets with installed Burrete tool recommendations.
 - Added an installed-Burrete host integration test and compatibility aliases for rc.5 step names.
-
-All notable changes to LP-Flow are documented here.
-
-## [Unreleased]
 
 ## [0.1.0-rc.5] - 2026-07-22
 
@@ -28,7 +37,7 @@ All notable changes to LP-Flow are documented here.
   notices, and release package.
 - Reduced the source release while preserving docking, MD, scheduler, manifest,
   scientific parsing, Burrete handoff, security, and CI coverage.
-- Aligned `.mcp.json` with the standard Codex `mcpServers` plugin manifest.
+- Added the first bundled MCP configuration for the LP-Flow server.
 
 ## [0.1.0-rc.3] - 2026-07-21
 

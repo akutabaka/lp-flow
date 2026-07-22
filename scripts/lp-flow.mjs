@@ -28,6 +28,7 @@ const GENERATED_DIR_NAMES = new Set([
 ]);
 const DEFAULT_METHODS = ['gnina', 'smina', 'boltz'];
 const VALID_METHODS = new Set(['gnina', 'smina', 'boltz', 'matcha']);
+const EXECUTION_SIGNAL = Symbol('lp-flow.execution-signal');
 
 function normalizeString(value) {
   return typeof value === 'string' ? value.trim() : '';
@@ -3817,6 +3818,7 @@ async function runCommand(argv, options = {}) {
   const { spawn } = await import('node:child_process');
   const timeoutMs = Number.parseInt(options.timeout_ms || options.timeoutMs || 300000, 10);
   const maxOutputBytes = Number.parseInt(options.max_output_bytes || options.maxOutputBytes || 200000, 10);
+  const signal = options[EXECUTION_SIGNAL] || options.signal;
   return await new Promise(resolve => {
     const startedAt = new Date().toISOString();
     const startedMs = Date.now();
@@ -3824,8 +3826,11 @@ async function runCommand(argv, options = {}) {
     let stdout = '';
     let stderr = '';
     let timedOut = false;
+    let cancelled = false;
     let terminationSignal = null;
     let settled = false;
+    let timer;
+    let forceTimer;
     const append = (kind, chunk) => {
       const text = chunk.toString('utf8');
       if (kind === 'stdout') stdout = (stdout + text).slice(-maxOutputBytes);
@@ -3836,25 +3841,38 @@ async function runCommand(argv, options = {}) {
       settled = true;
       clearTimeout(timer);
       clearTimeout(forceTimer);
-      resolve({ ...payload, elapsed_ms: Date.now() - startedMs, termination_signal: terminationSignal });
+      signal?.removeEventListener('abort', abort);
+      resolve({ ...payload, elapsed_ms: Date.now() - startedMs, termination_signal: terminationSignal, cancelled });
     };
-    const timer = setTimeout(() => {
-      timedOut = true;
-      terminationSignal = 'SIGTERM';
+    const terminate = () => {
+      if (!terminationSignal) terminationSignal = 'SIGTERM';
       child.kill('SIGTERM');
+      if (!forceTimer) {
+        forceTimer = setTimeout(() => {
+          if (settled) return;
+          terminationSignal = currentPlatform() === 'win32' ? 'terminate' : 'SIGKILL';
+          child.kill(currentPlatform() === 'win32' ? undefined : 'SIGKILL');
+        }, 2000);
+      }
+    };
+    const abort = () => {
+      if (settled) return;
+      cancelled = true;
+      terminate();
+    };
+    timer = setTimeout(() => {
+      timedOut = true;
+      terminate();
     }, timeoutMs);
-    const forceTimer = setTimeout(() => {
-      if (!timedOut || settled) return;
-      terminationSignal = currentPlatform() === 'win32' ? 'terminate' : 'SIGKILL';
-      child.kill(currentPlatform() === 'win32' ? undefined : 'SIGKILL');
-    }, timeoutMs + 2000);
+    if (signal?.aborted) abort();
+    else signal?.addEventListener('abort', abort, { once: true });
     child.stdout.on('data', chunk => append('stdout', chunk));
     child.stderr.on('data', chunk => append('stderr', chunk));
     child.on('error', error => {
       finish({ ok: false, started_at: startedAt, argv, exit_code: null, error: error.message, stdout, stderr, timed_out: timedOut });
     });
     child.on('close', code => {
-      finish({ ok: code === 0 && !timedOut, started_at: startedAt, argv, exit_code: code, stdout, stderr, timed_out: timedOut });
+      finish({ ok: code === 0 && !timedOut && !cancelled, started_at: startedAt, argv, exit_code: code, stdout, stderr, timed_out: timedOut });
     });
   });
 }
@@ -5166,11 +5184,11 @@ function jsonText(value) {
   return JSON.stringify(value, null, 2);
 }
 
-async function callTool(name, args, mode = 'public') {
+async function callTool(name, args, mode = 'public', options = {}) {
   const tool = getTool(name);
   if (!tool) throw new Error(`Unknown tool: ${name}`);
   if (!includeToolInMode(tool, mode)) throw new Error(`Tool is not available in ${mode} MCP visibility: ${name}`);
-  return await tool.handler(args || {});
+  return await tool.handler({ ...(args || {}), [EXECUTION_SIGNAL]: options.signal });
 }
 
 function mcpResponse(id, result) {
@@ -5237,6 +5255,7 @@ async function handleMcpMessage(message, session) {
     return;
   }
   const { id, method, params } = message;
+  if (id !== undefined) session.queuedRequests.delete(id);
   if (message.jsonrpc !== '2.0' || typeof method !== 'string') {
     sendMessage(mcpError(id ?? null, -32600, 'Invalid Request'));
     return;
@@ -5245,7 +5264,17 @@ async function handleMcpMessage(message, session) {
     if (session.initializeResponded) session.initialized = true;
     return;
   }
-  if (method === 'notifications/cancelled') return;
+  if (method === 'notifications/cancelled') {
+    const active = session.activeRequests.get(params?.requestId);
+    if (active) {
+      active.cancelled = true;
+      active.reason = normalizeString(params?.reason);
+      active.controller.abort(active.reason || 'MCP request cancelled');
+    } else if (session.queuedRequests.has(params?.requestId)) {
+      session.pendingCancellations.set(params.requestId, normalizeString(params?.reason));
+    }
+    return;
+  }
   if (id === undefined && method.startsWith('notifications/')) return;
   try {
     if (method === 'initialize') {
@@ -5276,8 +5305,22 @@ async function handleMcpMessage(message, session) {
     }
     if (method === 'tools/call') {
       const mode = toolDiscoveryMode(params || {});
-      const result = await callTool(params?.name, params?.arguments || {}, mode);
-      sendMessage(mcpResponse(id, mcpToolResult(result)));
+      const active = { controller: new AbortController(), cancelled: false, reason: '' };
+      session.activeRequests.set(id, active);
+      if (session.pendingCancellations.has(id)) {
+        active.cancelled = true;
+        active.reason = session.pendingCancellations.get(id);
+        session.pendingCancellations.delete(id);
+        active.controller.abort(active.reason || 'MCP request cancelled');
+      }
+      try {
+        const result = await callTool(params?.name, params?.arguments || {}, mode, { signal: active.controller.signal });
+        if (!active.cancelled) sendMessage(mcpResponse(id, mcpToolResult(result)));
+      } catch (error) {
+        if (!active.cancelled) throw error;
+      } finally {
+        session.activeRequests.delete(id);
+      }
       return;
     }
     if (method === 'ping') {
@@ -5302,8 +5345,15 @@ function startMcpServer() {
   if (typeof process === 'undefined') throw new Error('process is required to start the MCP stdio server');
   let buffer = '';
   let messageQueue = Promise.resolve();
-  const session = { initializeResponded: false, initialized: false };
+  const session = {
+    initializeResponded: false,
+    initialized: false,
+    activeRequests: new Map(),
+    pendingCancellations: new Map(),
+    queuedRequests: new Set(),
+  };
   const enqueue = message => {
+    if (message?.id !== undefined) session.queuedRequests.add(message.id);
     messageQueue = messageQueue.then(() => handleMcpMessage(message, session)).catch(error => {
       sendMessage(mcpError(null, -32603, error instanceof Error ? error.message : String(error)));
     });
@@ -5318,7 +5368,12 @@ function startMcpServer() {
       buffer = buffer.slice(newline + 1);
       if (!rawBody) continue;
       try {
-        enqueue(JSON.parse(rawBody));
+        const message = JSON.parse(rawBody);
+        if (message?.method === 'notifications/cancelled') {
+          void handleMcpMessage(message, session);
+        } else {
+          enqueue(message);
+        }
       } catch (error) {
         sendMessage(mcpError(null, -32700, error instanceof Error ? error.message : String(error)));
       }
@@ -5779,6 +5834,7 @@ export {
   prepareRedockingCase,
   pluginStatus,
   recordBurreteReceipt,
+  runCommand,
   remoteExecuteStep,
   resolveProfile,
   safeRemoteCleanupCheck,

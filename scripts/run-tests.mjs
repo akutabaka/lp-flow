@@ -8,6 +8,7 @@ const tests = [
   'scripts/check-static.mjs',
   'scripts/check-source-release.mjs',
   'tests/mcp/check_stdio_conformance.mjs',
+  'tests/mcp/check_cancellation.mjs',
   'tests/integration/check_burrete_host_integration.mjs',
   'tests/contracts/check_public_contract.mjs',
   'tests/contracts/check_pipeline_skills_contract.mjs',
@@ -15,6 +16,7 @@ const tests = [
   'tests/execution/check_pipeline_execution_smoke.mjs',
   'tests/contracts/check_source_package.mjs',
 ];
+let burreteHostStatus = 'NOT_RUN';
 
 for (const relative of tests) {
   const result = spawnSync(process.execPath, [relative], {
@@ -26,6 +28,9 @@ for (const relative of tests) {
   process.stdout.write(result.stdout || '');
   process.stderr.write(result.stderr || '');
   if (result.error || result.status !== 0) process.exit(result.status ?? 1);
+  if (relative.endsWith('check_burrete_host_integration.mjs')) {
+    burreteHostStatus = /BURRETE_HOST_STATUS=(PASSED|SKIPPED)/.exec(result.stdout || '')?.[1] || 'UNKNOWN';
+  }
 }
 
-console.log('LP-Flow full test suite PASSED');
+console.log(`LP-Flow full test suite PASSED (Burrete host: ${burreteHostStatus})`);

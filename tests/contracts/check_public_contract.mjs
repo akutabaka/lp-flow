@@ -169,9 +169,9 @@ function checkPluginMcpConfig() {
   const mcpConfigPath = path.join(repoRoot, '.mcp.json');
   assert(existsSync(mcpConfigPath), `.mcp.json not found: ${mcpConfigPath}`);
   const config = JSON.parse(readFileSync(mcpConfigPath, 'utf8'));
-  assert(Object.hasOwn(config, 'mcpServers'), '.mcp.json must use the standard mcpServers wrapper');
-  assert(!Object.hasOwn(config, 'mcp_servers'), '.mcp.json must not use the legacy mcp_servers key');
-  const servers = config.mcpServers;
+  assert(!Object.hasOwn(config, 'mcpServers'), '.mcp.json must not use the undocumented camelCase mcpServers wrapper');
+  assert(!Object.hasOwn(config, 'mcp_servers'), '.mcp.json uses the documented direct server-map form');
+  const servers = config;
   assert(servers.lp_flow_mcp, '.mcp.json must expose lp_flow_mcp');
   assert(!servers['lp-flow'], '.mcp.json must not use a hyphenated MCP server id');
   assert(servers.lp_flow_mcp.cwd === '.', '.mcp.json lp_flow_mcp must set cwd "."');

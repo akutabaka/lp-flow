@@ -16,14 +16,15 @@ const root = candidates.find(candidate =>
 );
 
 if (!root) {
-  const message = `Burrete host integration SKIPPED: installed plugin not found (${candidates.join(', ')})`;
+  const message = `BURRETE_HOST_STATUS=SKIPPED installed plugin not found (${candidates.join(', ')})`;
   if (required) throw new Error(message);
   console.log(message);
   process.exit(0);
 }
 
 const config = JSON.parse(readFileSync(path.join(root, '.mcp.json'), 'utf8'));
-const server = Object.values(config.mcpServers || {})[0];
+const servers = config.mcp_servers || config.mcpServers || config;
+const server = Object.values(servers)[0];
 if (!server?.command || !Array.isArray(server.args)) throw new Error('Installed Burrete .mcp.json has no runnable server');
 
 const requests = [
@@ -66,4 +67,4 @@ if (validation?.ok !== true || validation?.summary?.surface !== 'trajectory-revi
   throw new Error(`Installed Burrete trajectory validation failed: ${JSON.stringify(validation)}`);
 }
 
-console.log(`Burrete host integration PASSED (${root})`);
+console.log(`BURRETE_HOST_STATUS=PASSED root=${root}`);
