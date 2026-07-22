@@ -32,9 +32,11 @@ passes selected poses or MD display trajectories to Burrete.
 
 ## Quick Start
 
-LP-Flow requires Node.js 20+ and a Codex host. Register the public marketplace
-with `codex plugin marketplace add akutabaka/lp-flow --ref main`, install
-LP-Flow from the Plugins Directory, restart the host, and start a new chat. See
+LP-Flow requires Node.js 20+ and a Codex host. For a reproducible release
+installation, register the public marketplace with
+`codex plugin marketplace add akutabaka/lp-flow --ref v0.1.0-rc.8`, install
+LP-Flow from the Plugins Directory, restart the host, and start a new chat. Use
+`--ref main` only for the current development channel. See
 [Installation](docs/installation.md) for verification and local-development
 instructions.
 

@@ -9,9 +9,12 @@ Register the public repository as a marketplace and install LP-Flow from the
 Plugins Directory:
 
 ```bash
-codex plugin marketplace add akutabaka/lp-flow --ref main
+codex plugin marketplace add akutabaka/lp-flow --ref v0.1.0-rc.8
 codex plugin marketplace list
 ```
+
+The release tag provides a reproducible installation. Use `--ref main` only
+when intentionally testing the current development channel.
 
 Restart the ChatGPT desktop app, open **Plugins**, select **LP-Flow**, install
 the plugin, and start a new chat. Verify that four skills and the `lp_flow_mcp`
