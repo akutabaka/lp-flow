@@ -4,16 +4,8 @@ outputs/
 .lp-flow-runs/
 tmp*/
 **/tmp*/
-viewer-output/
-viewer*/
 screenshots/
 validation-artifacts/
-
-# Generated Mol* / Mol View Stories artifacts.
-*.mvsj
-*.mvsx
-*.mvstory
-*.molx
 
 # Downloaded validation/scientific data should be user-provided, not bundled.
 *.bcif

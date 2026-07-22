@@ -72,6 +72,8 @@ status.
 - [Profiles](docs/profiles.md)
 - [Golden prompts](docs/golden-prompts.md)
 - [Security policy](SECURITY.md)
+- [Contributing](CONTRIBUTING.md)
+- [Changelog](CHANGELOG.md)
 
 The automated suite covers public MCP contracts, skills, golden prompts,
 non-destructive execution smoke behavior, source hygiene, and extracted release

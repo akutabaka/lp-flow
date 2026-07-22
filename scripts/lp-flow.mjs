@@ -5138,13 +5138,13 @@ Session lifecycle commands are advanced because they open or close a persistent 
 }
 
 function printInternalHelp() {
-  console.log(`LP-Flow MCP-as-CLI - internal/compatibility surface
+  console.log(`LP-Flow MCP-as-CLI - internal maintenance surface
 
-Internal/compatibility policy:
+Internal maintenance policy:
   These commands are preserved for direct calls, scripts, and plugin maintenance.
   They are not part of the normal public user workflow.
 
-Internal/compatibility commands:
+Internal maintenance commands:
   node scripts/lp-flow.mjs validate-case --folder <task-folder>
   node scripts/lp-flow.mjs find-case --input <folder|receptor|pdb-id> [--root <search-root>]
   node scripts/lp-flow.mjs resolve-profile --profile-name <local-profile>

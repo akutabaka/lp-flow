@@ -252,7 +252,7 @@ function checkAdvancedInternalHelp() {
   assertNotIncludes(advanced, 'CellPACK', 'advanced help');
 
   const internal = requireCli(['--help', '--internal'], 'internal help').text;
-  assertIncludes(internal, 'Internal/compatibility', 'internal help');
+  assertIncludes(internal, 'Internal maintenance', 'internal help');
   for (const command of ['build-run-plan', 'remote-command-plan', 'remote-execute-step']) {
     assertIncludes(internal, command, 'internal help');
   }

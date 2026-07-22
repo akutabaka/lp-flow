@@ -1,8 +1,8 @@
 # LP-Flow MCP / CLI
 
 The public surface is for user-provided docking, scoring, MD, runtime checking,
-and Burrete handoff workflows. It should not pick bundled validation cases or
-old viewer artifacts as inputs.
+and Burrete handoff workflows. It does not select bundled validation cases as
+scientific inputs.
 
 ## CLI Families
 
@@ -34,9 +34,7 @@ upload -> preflight -> check_docking_scheduler -> run_docking_payload -> check_d
 ```
 
 Use Burrete for ordinary molecular viewing, docking pose review, trajectory
-playback, object-tree/debug layout, and visual QA. LP-Flow viewer
-compatibility commands exist only for explicit legacy artifact tasks and should
-not be selected as the default visualization path.
+playback, object-tree/debug layout, and visual QA.
 
 ## MCP Tools
 
@@ -54,10 +52,10 @@ Public:
 - `lp_flow_remote_command_plan`
 - `lp_flow_remote_execute_step`
 
-Compatibility story/viewer tools may appear only when advanced/internal
-discovery is explicitly requested. A normal public MCP `tools/call` rejects
-tools outside public visibility. Do not use compatibility tools for ordinary
-visualization; hand off structures, poses, and trajectories to Burrete.
+Internal maintenance tools may appear only when internal discovery is
+explicitly requested. A normal public MCP `tools/call` rejects tools outside
+public visibility. Structures, poses, and trajectories are handed to Burrete
+for visualization.
 
 `open_burrete_pose_review` and `open_burrete_trajectory_review` are recorded
 handoff gates. After the Burrete attempt, call the step with an exact

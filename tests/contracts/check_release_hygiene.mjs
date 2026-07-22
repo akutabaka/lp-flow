@@ -79,6 +79,16 @@ assert(!notices.includes('Mol View Stories'), 'third-party notices must not list
 assert(!existsSync(path.join(root, 'assets', 'mvs-stories')), 'legacy viewer assets must not be bundled');
 assert(existsSync(path.join(root, 'assets', 'screenshots', 'lp-flow-demo.png')), 'README hero screenshot is missing');
 assert(existsSync(path.join(root, 'assets', 'diagrams', 'lp-flow-architecture.svg')), 'architecture diagram is missing');
+for (const removed of [
+  'docs/security.md',
+  'scripts/compute-runtime/resolve_profile.py',
+  'scripts/server-docking-pipeline/find_case_folder.py',
+  'scripts/server-docking-pipeline/validate_inputs.py',
+  'scripts/start-mcp.ps1',
+  'scripts/start-mcp.sh',
+]) {
+  assert(!existsSync(path.join(root, ...removed.split('/'))), `dead or duplicate source file returned: ${removed}`);
+}
 
 if (failures.length) {
   console.error('Release hygiene check FAILED');
